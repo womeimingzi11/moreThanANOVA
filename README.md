@@ -1,4 +1,4 @@
-# morThanANOVA
+# moreThanANOVA
 
 ## Why ANOVA
 Once you want to compare some data between different treatments, what you learned from plenty of papers, articles and thesises is using **ANOVA (Analysis of variance)**, even we don't really know what is ANOVA.
