@@ -13,11 +13,11 @@ Howver, what others do are not always right, are they? At least, are not always 
 
 Here, we don't state what is ANOVA, there are amount of articles and videos about this topic.
 
-For what I can tell, there is an **premise** of ANOVA, in fact for all t-test family, is **Normal Distribution**(also Known as **Gaussian Distribution**). Once your data do not meet normal distribution, maybe you want to transform them, like log(x+1), square-root, log, etc.
+For what I can tell, there is an **premise** of ANOVA, in fact it is a premise for all t-test family, is **Normal Distribution**(also Known as **Gaussian Distribution**). Once your data do not meet normal distribution, maybe you want to transform them, like log(x+1), square-root, log, etc.
 
 However, we are not always lucky dogs, literally, it even never works for me in my current research.
 
-Gernerally, we choose nonparametric tests, the most famous nonparametric tsts to compare data between treatments like ANOVA are **Mann–Whitney U test**. Speak the Mann-Whitney U test, their are conceptions about signed-rank test and signed-rank sum test. We also don't state what are these conceptions, but I highly recommand you to Google them before you choose a test.
+Gernerally, we choose nonparametric tests, the most famous nonparametric tests to compare data between treatments like ANOVA are **Mann–Whitney U test**. Speak the Mann-Whitney U test, their are conceptions about signed-rank test and signed-rank sum test. We also don't state what are these conceptions, but I highly recommand you to Google them before you choose a test.
 
 
 You are welcomed to commit any feature about this and even any other features in my [repo on GitHub](https://github.com/womeimingzi11/rdaWithStep).
