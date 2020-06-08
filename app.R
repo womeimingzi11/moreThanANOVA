@@ -15,20 +15,19 @@ library(plotly)
 
 # Package for data manipulation
 library(tidyverse)
-# library(ggthemes)
-# library(ggvegan)
-
+library(broom)
+library(ggstatsplot)
+library(cowplot)
 
 # Define UI for application that draws a histogram
 ui <- fluidPage(
-    
-    tags$head(
-        tags$style(HTML("
+    tags$head(tags$style(HTML(
+        "
         h3 {
             font-weight:bold
         }
-                        "))
-    ),
+                        "
+    ))),
     
     # Application title
     theme = shinytheme('yeti'),
@@ -74,9 +73,62 @@ ui <- fluidPage(
             ),
             tabPanel(
                 'Comparisons',
-                DTOutput('compare_ls')
+                div(
+                    p(
+                        'It will take for a while to generate figures, please don\'t close this page or switch to anotheer tab'
+                    ),
+                    p(
+                        'Once you change any item at the left side of this figure, it will generate a new figure.'
+                    )
+                ),
+                h3('Difference test between groups'),
+                DTOutput('compare_ls'),
+                h3('Post-Hoc Tests'),
+                fluidRow(
+                    column(
+                        3,
+                        textInput('plot_x_lab',
+                                  "label of X axis",
+                                  'Treatment'),
+                        textInput('plot_y_lab',
+                                  "label of Y axis",
+                                  'value'),
+                        textInput(
+                            'title_prefix',
+                            "The prefix text for the fixed plot title",
+                            "Variable"
+                        ),
+                        selectInput(
+                            'pairwise_display',
+                            'Which pairwise comparisons to display?',
+                            choices = c(
+                                'significant only' = 'significant',
+                                'including non-significant' = 'all',
+                                'non-significant only' = 'non-significant'
+                            ),
+                            selected = 'significant'
+                        ),
+                        selectInput(
+                            'pairwise_annotation',
+                            'Annotations to use for pairwise comparisons',
+                            choices = c("p.value",
+                                        "asterisk"),
+                            selected = 'asterisk'
+                        )
+                    ),
+                    column(6,
+                           plotOutput('gg_post_hoc')),
+                    column(
+                        2,
+                        p(
+                            'Even the figure looks massy, you can try to download it. Gernerally the downloaded figure is clearer.'
+                        ),
+                        downloadButton('dl_gg'),
+                        'Download Figure'
+                    )
+                )
             )
-        ), )
+        ))
     )
 )
 
@@ -138,7 +190,7 @@ server <- function(input, output) {
     #    This reactive function is called
     #    rct_df_data
     #    return: tibble
-    #    render: DT
+    #    render: DT - with Buttons
     ########################################
     
     rct_dist_detect <- reactive({
@@ -172,13 +224,13 @@ server <- function(input, output) {
     ########################################
     
     rct_analysis_method <- reactive({
-        rct_dist_detect()[, -1] %>%
+        rct_dist_detect()[,-1] %>%
             sapply(function(variable) {
                 if_else(any(str_detect(variable, 'skewed')),
                         'Nonparametric tests',
                         'Parametric tests')
             }) %>%
-            t()%>%
+            t() %>%
             as_tibble()
     })
     
@@ -195,18 +247,32 @@ server <- function(input, output) {
     #       axes: both x and y are free
     ########################################
     
-    rct_df_hist <- reactive({
+    ########################################
+    # Tame data by Treatment,
+    # It will be used in rct_df_data_by_tr
+    # (distribution plot) and
+    # rct_gg_post_hoc (post hoc tests).
+    # therefore, we wrap it up as reactive
+    # function
+    ########################################
+    rct_df_data_by_tr <- reactive({
         rct_df_data() %>%
             pivot_longer(-Treatment) %>%
             ########################################
-            # To make the orders of figure follow
-            # the input table.
-            # We convert the variable name into
-            # factor and control the order of plot
-            # by the level
-            ########################################
-        dplyr::mutate(name = factor(name, levels = colnames(rct_df_data()) %>%
-                                        .[-1])) %>%
+        # To make the orders of figure follow
+        # the input table.
+        # We convert the variable name into
+        # factor and control the order of plot
+        # by the level
+        ########################################
+        dplyr::mutate(name =
+                          factor(name,
+                                 levels = colnames(rct_df_data()) %>%
+                                     .[-1]))
+    })
+    
+    rct_df_hist <- reactive({
+        rct_df_data_by_tr() %>%
             ggplot(aes(value)) +
             # geom_histogram() +
             geom_density(fill = 'skyblue') +
@@ -227,12 +293,14 @@ server <- function(input, output) {
     ########################################
     
     output$dist_detect <-
-        renderDT({rct_dist_detect()},
-                 extensions = 'Buttons',
-                 options = list(
-                     dom = 'Bfrtip',
-                     buttons = c('copy', 'csv', 'excel', 'pdf', 'print')
-                 ))
+        renderDT({
+            rct_dist_detect()
+        },
+        extensions = 'Buttons',
+        options = list(
+            dom = 'Bfrtip',
+            buttons = c('copy', 'csv', 'excel', 'pdf', 'print')
+        ))
     
     output$analysis_method <-
         renderDT(rct_analysis_method())
@@ -246,31 +314,158 @@ server <- function(input, output) {
     # Time to compare data across treatments
     ########################################
     
+    ########################################
+    # 1. compare data across treatments,
+    #    the comparison method was
+    #    determined by rct_analysis_method.
+    #    This reactive function is called
+    #    rct_compare_ls
+    #    return: tibble
+    #    render: DT - with Buttons
+    ########################################
     rct_compare_ls <- reactive({
-        map2(rct_analysis_method(), rct_df_data()[,-1], function(x,y){
-            if(x == 'Nonparametric tests'){
-                kruskal.test(y, rct_df_data()[,1][[1]], na.action = na.omit) %>%
-                    broom::glance() %>%
-                    select('statistic', 'p.value', 'df' = 'parameter','method')
+        map2(rct_analysis_method(), rct_df_data()[, -1], function(x, y) {
+            if (x == 'Nonparametric tests') {
+                ########################################
+                # nonparametric test method choice
+                #
+                # wilcox tests family was only
+                # suitable for two treatment or groups.
+                # once there are triple or more groups
+                # kruskal.test is an alternative
+                ########################################
+                if (length(unique(rct_df_data()[, 1][[1]])) == 2) {
+                    wilcox.test(y ~ rct_df_data()[, 1][[1]], na.action = na.omit) %>%
+                        broom::glance() %>%
+                        select('statistic', 'p.value', 'df' = 'parameter', 'method')
+                } else {
+                    kruskal.test(y, rct_df_data()[, 1][[1]], na.action = na.omit) %>%
+                        broom::glance() %>%
+                        select('statistic', 'p.value', 'df' = 'parameter', 'method')
+                }
             } else {
-                aov(y~rct_df_data()[,1][[1]], na.action = na.omit) %>%
+                ########################################
+                # The result of ANOVA does not contain
+                # method, however, the only possible
+                # mehod is "ANOVA", so we can fill it
+                # manually
+                ########################################
+                aov(y ~ rct_df_data()[, 1][[1]], na.action = na.omit) %>%
                     broom::glance() %>%
                     select('statistic', 'p.value', 'df') %>%
                     bind_cols(method = 'ANOVA')
-            }}) %>%
+            }
+        }) %>%
             bind_rows() %>%
-            bind_cols(
-                 tibble(variable = colnames(rct_analysis_method())),
-                .)
+            bind_cols(tibble(variable = colnames(rct_analysis_method())),
+                      .)
     })
     
     output$compare_ls <-
-        renderDT({rct_compare_ls()},
-                 extensions = 'Buttons',
-                 options = list(
-                     dom = 'Bfrtip',
-                     buttons = c('copy', 'csv', 'excel', 'pdf', 'print')
-                 ))
+        renderDT({
+            rct_compare_ls()
+        },
+        extensions = 'Buttons',
+        options = list(
+            dom = 'Bfrtip',
+            buttons = c('copy', 'csv', 'excel', 'pdf', 'print')
+        ))
+    ########################################
+    # 2. Post-Hoc Tests
+    #    the comparison method was
+    #    determined by rct_analysis_method.
+    #    This reactive function is called
+    #    rct_gg_post_hoc
+    #    return: ggobject
+    #    render: plotly
+    #
+    #   Customized parameter
+    #
+    #       xlab = input$plot_x_lab,
+    #       ylab = input$plot_y_lab,
+    #       pairwise.display = input$pairwise_display,
+    #       pairwise.annotation = input$pairwise_annotation,
+    #       title.prefix = input$title_prefix,
+    ########################################
+    rct_gg_post_hoc <- reactive({
+        if (is.null(input$title_prefix)) {
+            return('Please set title prefix')
+        }
+        if (is.null(input$plot_x_lab)) {
+            return('Please set label of X axis')
+        }
+        if (is.null(input$plot_y_lab)) {
+            return('Please set label of Y axis')
+        }
+        
+        post_hoc_data <-
+            rct_df_data_by_tr() %>%
+            nest(-name) %>%
+            mutate(data = map2(name, data, function(x, y) {
+                bind_cols(name = x, y)
+            }))
+        rct_analysis_method() %>%
+            map2(post_hoc_data$data, function(x, y) {
+                withProgress(expr = {
+                    setProgress(
+                        message = 'Calculation in progress',
+                        detail = 'This may take a while...',
+                        value = 1
+                    )
+                    if (x == 'Nonparametric tests') {
+                        analysis_method = 'nonparametric'
+                    } else {
+                        analysis_method = 'parametric'
+                    }
+                    grouped_ggbetweenstats(
+                        data =
+                            y,
+                        x = Treatment,
+                        y = value,
+                        grouping.var = name,
+                        type = analysis_method,
+                        nboot = 10,
+                        plot.type = 'box',
+                        pairwise.comparisons = TRUE,
+                        results.subtitle = FALSE,
+                        ggstatsplot.layer = FALSE,
+                        mean.plotting	= FALSE,
+                        sample.size.label = FALSE,
+                        messages = TRUE,
+                        ggtheme = theme_classic(),
+                        ########################################
+                        # Customized parameter
+                        ########################################
+                        xlab = input$plot_x_lab,
+                        ylab = input$plot_y_lab,
+                        pairwise.display = input$pairwise_display,
+                        pairwise.annotation = input$pairwise_annotation,
+                        title.prefix = input$title_prefix,
+                    )
+                    # Sys.sleep(0.1)
+                })
+            }) %>%
+            plot_grid(plotlist = .)
+    })
+    
+    
+    output$gg_post_hoc <-
+        renderPlot({
+            rct_gg_post_hoc()
+        })
+    ########################################
+    # 3. save and download figure as PDF
+    #    This downloadhandler is called
+    #    dl_gg
+    ########################################
+    output$dl_gg <-
+        downloadHandler(
+            filename = "post_hoc_figure.pdf",
+            content = function(file) {
+                ggsave(file,
+                       plot = rct_gg_post_hoc())
+            }
+        )
 }
 
 # Run the application
