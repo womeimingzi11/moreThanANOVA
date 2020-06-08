@@ -15,15 +15,23 @@ library(plotly)
 
 # Package for data manipulation
 library(tidyverse)
-library(ggthemes)
+# library(ggthemes)
 # library(ggvegan)
 
 
 # Define UI for application that draws a histogram
 ui <- fluidPage(
+    
+    tags$head(
+        tags$style(HTML("
+        h3 {
+            font-weight:bold
+        }
+                        "))
+    ),
+    
     # Application title
-    # Application title
-    theme = shinytheme('flatly'),
+    theme = shinytheme('yeti'),
     titlePanel("moreThanANOVA"),
     h4(
         'Creator:',
@@ -57,9 +65,16 @@ ui <- fluidPage(
                      DTOutput("df_com")),
             tabPanel(
                 'Distribution Determine',
+                h3('Data Distributions'),
                 DTOutput('dist_detect'),
+                h3('Comparation Method'),
                 DTOutput('analysis_method'),
+                h3('Density plot'),
                 plotlyOutput("df_hist")
+            ),
+            tabPanel(
+                'Comparisons',
+                DTOutput('compare_ls')
             )
         ), )
     )
@@ -160,11 +175,11 @@ server <- function(input, output) {
         rct_dist_detect()[, -1] %>%
             sapply(function(variable) {
                 if_else(any(str_detect(variable, 'skewed')),
-                        'Mann–Whitney U test',
-                        'ANOVA')
+                        'Nonparametric tests',
+                        'Parametric tests')
             }) %>%
-            bind_cols(Variable = colnames(rct_dist_detect()[,-1]),
-                      'Suitable Mehode' = .)
+            t()%>%
+            as_tibble()
     })
     
     ########################################
@@ -184,12 +199,12 @@ server <- function(input, output) {
         rct_df_data() %>%
             pivot_longer(-Treatment) %>%
             ########################################
-        # To make the orders of figure follow
-        # the input table.
-        # We convert the variable name into
-        # factor and control the order of plot
-        # by the level
-        ########################################
+            # To make the orders of figure follow
+            # the input table.
+            # We convert the variable name into
+            # factor and control the order of plot
+            # by the level
+            ########################################
         dplyr::mutate(name = factor(name, levels = colnames(rct_df_data()) %>%
                                         .[-1])) %>%
             ggplot(aes(value)) +
@@ -200,7 +215,7 @@ server <- function(input, output) {
                 cols = vars(name),
                 scales = 'free'
             ) +
-            theme_wsj()
+            theme_classic()
     })
     
     ########################################
@@ -212,13 +227,50 @@ server <- function(input, output) {
     ########################################
     
     output$dist_detect <-
-        renderDT(rct_dist_detect())
+        renderDT({rct_dist_detect()},
+                 extensions = 'Buttons',
+                 options = list(
+                     dom = 'Bfrtip',
+                     buttons = c('copy', 'csv', 'excel', 'pdf', 'print')
+                 ))
     
     output$analysis_method <-
         renderDT(rct_analysis_method())
     
     output$df_hist <-
         renderPlotly(rct_df_hist())
+    
+    ########################################
+    # comparison
+    #
+    # Time to compare data across treatments
+    ########################################
+    
+    rct_compare_ls <- reactive({
+        map2(rct_analysis_method(), rct_df_data()[,-1], function(x,y){
+            if(x == 'Nonparametric tests'){
+                kruskal.test(y, rct_df_data()[,1][[1]], na.action = na.omit) %>%
+                    broom::glance() %>%
+                    select('statistic', 'p.value', 'df' = 'parameter','method')
+            } else {
+                aov(y~rct_df_data()[,1][[1]], na.action = na.omit) %>%
+                    broom::glance() %>%
+                    select('statistic', 'p.value', 'df') %>%
+                    bind_cols(method = 'ANOVA')
+            }}) %>%
+            bind_rows() %>%
+            bind_cols(
+                 tibble(variable = colnames(rct_analysis_method())),
+                .)
+    })
+    
+    output$compare_ls <-
+        renderDT({rct_compare_ls()},
+                 extensions = 'Buttons',
+                 options = list(
+                     dom = 'Bfrtip',
+                     buttons = c('copy', 'csv', 'excel', 'pdf', 'print')
+                 ))
 }
 
 # Run the application
