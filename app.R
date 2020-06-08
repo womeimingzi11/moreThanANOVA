@@ -31,7 +31,7 @@ ui <- fluidPage(
     
     # Application title
     theme = shinytheme('yeti'),
-    titlePanel("moreThanANOVA"),
+    titlePanel("moreThanANOVA (can't upload file yet)"),
     h4(
         'Creator:',
         a(href = "https://womeimingzi11.github.io", 'Han Chen')
@@ -114,7 +114,20 @@ ui <- fluidPage(
                             choices = c("p.value",
                                         "asterisk"),
                             selected = 'asterisk'
-                        )
+                        ),
+                        numericInput(
+                            'figure_ncol',
+                            'Figure numbers per row',
+                            min = 1,
+                            max = 10,
+                            value = 3
+                            ),
+                        numericInput(
+                            'figure_width',
+                            'Downloaded figure width',
+                            min = 3,
+                            max = 20,
+                            value = 12)
                     ),
                     column(6,
                            plotOutput('gg_post_hoc')),
@@ -445,7 +458,9 @@ server <- function(input, output) {
                     # Sys.sleep(0.1)
                 })
             }) %>%
-            plot_grid(plotlist = .)
+            plot_grid(plotlist = .,
+                      ncol = input$figure_ncol,
+                      align = 'h')
     })
     
     
@@ -463,7 +478,8 @@ server <- function(input, output) {
             filename = "post_hoc_figure.pdf",
             content = function(file) {
                 ggsave(file,
-                       plot = rct_gg_post_hoc())
+                       plot = rct_gg_post_hoc(),
+                       width = input$figure_width)
             }
         )
 }
