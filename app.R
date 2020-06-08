@@ -136,6 +136,16 @@ ui <- fluidPage(
                         max = 20,
                         value = 12
                     )
+                ),
+                column(
+                    3,
+                    numericInput(
+                        'figure_height',
+                        'Downloaded figure height (inch)',
+                        min = 3,
+                        max = 20,
+                        value = 9
+                    )
                 )),
                 p('Once setting parameter up, click', strong('Plot Start'), 'to plot figure or click', strong('Download Figure'),'to download it directly.'),
                 p('P.S. showing figure on this page and downloading figure implement in different code, even the figure in browser lookes massy or wired, the downloaded figure still can meet the standar of publication level with appropriate parameter sets.'),
@@ -416,70 +426,75 @@ server <- function(input, output) {
     #       pairwise.annotation = input$pairwise_annotation,
     #       title.prefix = input$title_prefix,
     ########################################
+    rct_gg_post_hoc <-
+        reactive({
+            {
+                if (is.null(input$title_prefix)) {
+                    return('Please set title prefix')
+                }
+                if (is.null(input$plot_x_lab)) {
+                    return('Please set label of X axis')
+                }
+                if (is.null(input$plot_y_lab)) {
+                    return('Please set label of Y axis')
+                }
+                
+                post_hoc_data <-
+                    rct_df_data_by_tr() %>%
+                    nest(-name) %>%
+                    mutate(data = map2(name, data, function(x, y) {
+                        bind_cols(name = x, y)
+                    }))
+                rct_analysis_method() %>%
+                    map2(post_hoc_data$data, function(x, y) {
+                        withProgress(expr = {
+                            setProgress(
+                                message = 'Calculation in progress',
+                                detail = 'This may take a while...',
+                                value = 1
+                            )
+                            if (x == 'Nonparametric tests') {
+                                analysis_method = 'nonparametric'
+                            } else {
+                                analysis_method = 'parametric'
+                            }
+                            grouped_ggbetweenstats(
+                                data =
+                                    y,
+                                x = Treatment,
+                                y = value,
+                                grouping.var = name,
+                                type = analysis_method,
+                                nboot = 10,
+                                plot.type = 'box',
+                                pairwise.comparisons = TRUE,
+                                results.subtitle = FALSE,
+                                ggstatsplot.layer = FALSE,
+                                mean.plotting	= FALSE,
+                                sample.size.label = FALSE,
+                                messages = TRUE,
+                                ggtheme = theme_classic(),
+                                ########################################
+                                # Customized parameter
+                                ########################################
+                                xlab = input$plot_x_lab,
+                                ylab = input$plot_y_lab,
+                                pairwise.display = input$pairwise_display,
+                                pairwise.annotation = input$pairwise_annotation,
+                                title.prefix = input$title_prefix,
+                            )
+                        })
+                    }) %>%
+                    plot_grid(
+                        plotlist = .,
+                        ncol = input$figure_ncol,
+                        align = 'h'
+                    )
+            }
+        })
     event_rct_gg_post_hoc <- eventReactive(input$plot_figure,
-                                           {
-                                               if (is.null(input$title_prefix)) {
-                                                   return('Please set title prefix')
-                                               }
-                                               if (is.null(input$plot_x_lab)) {
-                                                   return('Please set label of X axis')
-                                               }
-                                               if (is.null(input$plot_y_lab)) {
-                                                   return('Please set label of Y axis')
-                                               }
-                                               
-                                               post_hoc_data <-
-                                                   rct_df_data_by_tr() %>%
-                                                   nest(-name) %>%
-                                                   mutate(data = map2(name, data, function(x, y) {
-                                                       bind_cols(name = x, y)
-                                                   }))
-                                               rct_analysis_method() %>%
-                                                   map2(post_hoc_data$data, function(x, y) {
-                                                       withProgress(expr = {
-                                                           setProgress(
-                                                               message = 'Calculation in progress',
-                                                               detail = 'This may take a while...',
-                                                               value = 1
-                                                           )
-                                                           if (x == 'Nonparametric tests') {
-                                                               analysis_method = 'nonparametric'
-                                                           } else {
-                                                               analysis_method = 'parametric'
-                                                           }
-                                                           grouped_ggbetweenstats(
-                                                               data =
-                                                                   y,
-                                                               x = Treatment,
-                                                               y = value,
-                                                               grouping.var = name,
-                                                               type = analysis_method,
-                                                               nboot = 10,
-                                                               plot.type = 'box',
-                                                               pairwise.comparisons = TRUE,
-                                                               results.subtitle = FALSE,
-                                                               ggstatsplot.layer = FALSE,
-                                                               mean.plotting	= FALSE,
-                                                               sample.size.label = FALSE,
-                                                               messages = TRUE,
-                                                               ggtheme = theme_classic(),
-                                                               ########################################
-                                                               # Customized parameter
-                                                               ########################################
-                                                               xlab = input$plot_x_lab,
-                                                               ylab = input$plot_y_lab,
-                                                               pairwise.display = input$pairwise_display,
-                                                               pairwise.annotation = input$pairwise_annotation,
-                                                               title.prefix = input$title_prefix,
-                                                           )
-                                                       })
-                                                   }) %>%
-                                                   plot_grid(
-                                                       plotlist = .,
-                                                       ncol = input$figure_ncol,
-                                                       align = 'h'
-                                                   )
-                                           })
+                                           rct_gg_post_hoc()
+                                           )
     
     
     output$gg_post_hoc <-
@@ -496,8 +511,9 @@ server <- function(input, output) {
             filename = "post_hoc_figure.pdf",
             content = function(file) {
                 ggsave(file,
-                       plot = event_rct_gg_post_hoc(),
-                       width = input$figure_width)
+                       plot = rct_gg_post_hoc(),
+                       width = input$figure_width,
+                       height = input$figure_height)
             }
         )
 }
