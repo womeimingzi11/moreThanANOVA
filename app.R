@@ -31,7 +31,7 @@ ui <- fluidPage(
     
     # Application title
     theme = shinytheme('yeti'),
-    titlePanel("moreThanANOVA (can't upload file yet)"),
+    titlePanel("moreThanANOVA"),
     h4(
         'Creator:',
         a(href = "https://womeimingzi11.github.io", 'Han Chen')
@@ -39,7 +39,7 @@ ui <- fluidPage(
     h5(
         a(href = "mailto://chenhan28@gmail.com", 'chenhan28@gmail.com')
     ),
-    h6('Update version: 20600607'),
+    h6('Update version: 20600609'),
     
     # Sidebar with a slider input for number of bins
     sidebarLayout(
@@ -52,7 +52,7 @@ ui <- fluidPage(
                 selected = 'demo'
             ),
             conditionalPanel(condition = "input.data_source == 'file'",
-                             fileInput('df_data',
+                             fileInput('df_upload_file',
                                        'Please upload your data')),
         ),
         
@@ -184,9 +184,19 @@ server <- function(input, output) {
     #    render: DT
     ########################################
     rct_df_data <- reactive({
-        df <- read_csv('resource/data/df_com_smp.csv')
-        tr_name <- colnames(df)[1]
-        rename(df, 'Treatment' = tr_name)
+        if (input$data_source == 'demo') {
+            df <- read_csv('resource/data/df_com_smp.csv')
+            tr_name <- colnames(df)[1]
+            rename(df, 'Treatment' = tr_name)
+        } else {
+            if (is.null(input$df_upload_file)) {
+                return("")
+            } else {
+                df <- read_csv(input$df_upload_file$datapath)
+                tr_name <- colnames(df)[1]
+                rename(df, 'Treatment' = tr_name)
+            }
+        }
     })
     
     ########################################
