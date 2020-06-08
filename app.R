@@ -73,14 +73,6 @@ ui <- fluidPage(
             ),
             tabPanel(
                 'Comparisons',
-                div(
-                    p(
-                        'It will take for a while to generate figures, please don\'t close this page or switch to anotheer tab'
-                    ),
-                    p(
-                        'Once you change any item at the left side of this figure, it will generate a new figure.'
-                    )
-                ),
                 h3('Difference test between groups'),
                 DTOutput('compare_ls'),
                 h3('Post-Hoc Tests'),
