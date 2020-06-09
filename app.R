@@ -178,6 +178,10 @@ ui <- fluidPage(
                 ),
                 downloadButton('dl_gg', label = 'Download Figure'),
                 plotOutput('gg_post_hoc', width = 'auto'),
+            ),
+            tabPanel(
+                'Acknowledgements & References',
+                 includeMarkdown('resource/page/acknowledgements.md')
             )
         ))
     )
