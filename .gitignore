@@ -3,8 +3,7 @@
 .RData
 .Ruserdata
 Untitled.R
-post.pdf
 ggstat.R
-.html
-README.html
-.DS_Store
+*.html
+*.DS_Store
+*.pdf
