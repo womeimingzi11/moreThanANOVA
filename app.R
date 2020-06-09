@@ -69,7 +69,7 @@ ui <- fluidPage(
                 DTOutput('dist_detect'),
                 h3('Comparation Method'),
                 DTOutput('analysis_method'),
-                h3('Density plot'),
+                h3('Density Plot'),
                 plotlyOutput("df_hist")
             ),
             tabPanel(

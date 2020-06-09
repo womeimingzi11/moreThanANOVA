@@ -26,6 +26,6 @@ Their are conceptions about signed-rank test and signed-rank sum test. We also d
 You can upload your file with following structure.
 ![](resource/figure/table_str.png)
 
-You are welcomed to commit any feature about this and even any other features in my [repo on GitHub](https://github.com/womeimingzi11/rdaWithStep).
+You are welcomed to commit any feature about this and even any other features in my [repo on GitHub](https://github.com/womeimingzi11/moreThanANOVA).
 
 You are also welcomed to visit my [Blog (in Chinese)](https://womeimingzi11.github.io) or contact me by [mail](mailto://chenhan28@gmail.com).
