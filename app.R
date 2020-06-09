@@ -53,7 +53,7 @@ ui <- fluidPage(
             ),
             conditionalPanel(condition = "input.data_source == 'file'",
                              fileInput('df_upload_file',
-                                       'Please upload your data')),
+                                       'Please upload your data'))
         ),
         
         # Show a plot of the generated distribution
@@ -74,7 +74,28 @@ ui <- fluidPage(
             tabPanel(
                 'Comparisons',
                 h3('Difference test between groups'),
+                downloadButton('dl_compare_ls',
+                               'Download'),
                 DTOutput('compare_ls'),
+                ########################################
+                # Why don't use the DT tool button?
+                # Becasue the DT solve data table works
+                # on the server rather than local by
+                # default.
+                # 
+                # We can use the server = FALSE to load
+                # all the data to local, but once the
+                # data is a super large table, or
+                # your device is not high performance,
+                # it will frozen the browser or cause
+                # some crash.
+                # 
+                # So, we seperate the DT and Download
+                # to make things work well.
+                ########################################
+                downloadButton('dl_compare_table',
+                               'Download'),
+                DTOutput('compare_table'),
                 h3('Post-Hoc Tests'),
                 fluidRow(
                     column(3,
@@ -144,7 +165,7 @@ ui <- fluidPage(
                         'Downloaded figure height (inch)',
                         min = 3,
                         max = 20,
-                        value = 9
+                        value = 10
                     )
                 )),
                 p('Once setting parameter up, click', strong('Plot Start'), 'to plot figure or click', strong('Download Figure'),'to download it directly.'),
@@ -334,12 +355,7 @@ server <- function(input, output) {
     output$dist_detect <-
         renderDT({
             rct_dist_detect()
-        },
-        extensions = 'Buttons',
-        options = list(
-            dom = 'Bfrtip',
-            buttons = c('copy', 'csv', 'excel', 'pdf', 'print')
-        ))
+        })
     
     output$analysis_method <-
         renderDT(rct_analysis_method())
@@ -400,15 +416,31 @@ server <- function(input, output) {
                       .)
     })
     
-    output$compare_ls <-
-        renderDT({
-            rct_compare_ls()
-        },
-        extensions = 'Buttons',
-        options = list(
-            dom = 'Bfrtip',
-            buttons = c('copy', 'csv', 'excel', 'pdf', 'print')
-        ))
+    ########################################
+    # 2. compare data across treatments,
+    #    the comparison method was
+    #    determined by rct_analysis_method.
+    #    This reactive function is called
+    #    rct_compare_ls
+    #    return: tibble
+    #    render: DT - with Buttons
+    ########################################
+    
+    rct_compare_table <- reactive({
+        map2(colnames(rct_df_data()[,-1]),rct_df_data()[,-1], function(x, y){
+            bind_cols(rct_df_data()[,1], var = y) %>%
+                group_by(Treatment) %>%
+                summarize(
+                    Mean = mean(var),
+                    SE = sd(var),
+                    Median = median(var),
+                    IQR = IQR(var)
+                ) %>% 
+                bind_cols(Variable = x, .)
+        }) %>%
+            bind_rows()
+    })
+    
     ########################################
     # 2. Post-Hoc Tests
     #    the comparison method was
@@ -496,6 +528,31 @@ server <- function(input, output) {
                                            rct_gg_post_hoc()
                                            )
     
+    output$compare_ls <-
+        renderDT({
+            rct_compare_ls()
+        })
+    output$dl_compare_ls <-
+        downloadHandler(
+            filename = "compare_list.csv",
+            content = function(file) {
+                write_csv(x = rct_compare_ls(),
+                          path = file)
+            }
+        )
+    
+    output$compare_table <-
+        renderDT({
+            rct_compare_table()
+        })
+    output$dl_compare_table <-
+        downloadHandler(
+            filename = "compare_table.csv",
+            content = function(file) {
+                write_csv(x = rct_compare_table(),
+                          path = file)
+            }
+        )
     
     output$gg_post_hoc <-
         renderPlot({
