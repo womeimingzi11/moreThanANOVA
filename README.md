@@ -19,8 +19,12 @@ For what I can tell, there is an **premise** of ANOVA, in fact it is a premise f
 
 However, we are not always lucky dogs, literally, it even never works for me in my current research.
 
-Gernerally, we choose nonparametric tests, the most famous nonparametric tests to compare data between treatments like ANOVA are **Mann–Whitney U test**. Speak the Mann-Whitney U test, their are conceptions about signed-rank test and signed-rank sum test. We also don't state what are these conceptions, but I highly recommand you to Google them before you choose a test.
+Gernerally, we choose nonparametric tests, the most famous nonparametric tests to compare data between two treatments are **Mann–Whitney U test**, while across triple or more treatments, **Kruskal-Wallis rank sum test** are often performed.
 
+Their are conceptions about signed-rank test and signed-rank sum test. We also don't state what are these conceptions, but I highly recommand you to Google them before you choose a test. Here is a article that posted by **Stats and R** entitled [Wilcoxon test in R: how to compare 2 groups under the non-normality assumption](https://www.statsandr.com/blog/wilcoxon-test-in-r-how-to-compare-2-groups-under-the-non-normality-assumption/).
+
+You can upload your file with following structure.
+![](resource/figure/table_str.png)
 
 You are welcomed to commit any feature about this and even any other features in my [repo on GitHub](https://github.com/womeimingzi11/rdaWithStep).
 

@@ -44,6 +44,7 @@ ui <- fluidPage(
     # Sidebar with a slider input for number of bins
     sidebarLayout(
         sidebarPanel(
+            img(src = "table_str.png",width="100%"),
             radioButtons(
                 'data_source',
                 'Upload files or try the demo',
