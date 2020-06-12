@@ -18,6 +18,7 @@ library(tidyverse)
 library(broom)
 library(ggstatsplot)
 library(cowplot)
+library(coin)
 
 # Define UI for application that draws a histogram
 ui <- fluidPage(
@@ -44,7 +45,7 @@ ui <- fluidPage(
     # Sidebar with a slider input for number of bins
     sidebarLayout(
         sidebarPanel(
-            img(src = "table_str.png",width="100%"),
+            img(src = " table_str.png", width = "100%"),
             radioButtons(
                 'data_source',
                 'Upload files or try the demo',
@@ -52,138 +53,156 @@ ui <- fluidPage(
                             'Try the demo' = 'demo'),
                 selected = 'demo'
             ),
-            conditionalPanel(condition = "input.data_source == 'file'",
-                             fileInput('df_upload_file',
-                                       'Please upload your data'))
+            conditionalPanel(
+                condition = "input.data_source == 'file'",
+                fileInput('df_upload_file',
+                          'Please upload your data')
+            ),
+            selectInput('non_par_method',
+                        'Test method for non-parametric tests',
+                        choices = c('u test', 'Monte Carlo Permutation tests' = 'perm'),
+                        selected = 'perm')
         ),
         
         # Show a plot of the generated distribution
-        mainPanel(tabsetPanel(
-            tabPanel('Overview',
-                     includeMarkdown('resource/page/overview.md')),
-            tabPanel('Data Viewer',
-                     DTOutput("df_com")),
-            tabPanel(
-                'Distribution Determine',
-                h3('Data Distributions'),
-                DTOutput('dist_detect'),
-                h3('Comparation Method'),
-                DTOutput('analysis_method'),
-                h3('Density Plot'),
-                plotlyOutput("df_hist")
-            ),
-            tabPanel(
-                'Comparisons',
-                h3('Difference test between groups'),
-                downloadButton('dl_compare_ls',
-                               'Download'),
-                DTOutput('compare_ls'),
-                ########################################
-                # Why don't use the DT tool button?
-                # Becasue the DT solve data table works
-                # on the server rather than local by
-                # default.
-                # 
-                # We can use the server = FALSE to load
-                # all the data to local, but once the
-                # data is a super large table, or
-                # your device is not high performance,
-                # it will frozen the browser or cause
-                # some crash.
-                # 
-                # So, we seperate the DT and Download
-                # to make things work well.
-                ########################################
-                downloadButton('dl_compare_table',
-                               'Download'),
-                DTOutput('compare_table'),
-                h3('Post-Hoc Tests'),
-                fluidRow(
-                    column(3,
-                           textInput(
-                               'plot_x_lab',
-                               "label of X axis",
-                               'Treatment'
-                           )),
-                    column(3,
-                           textInput('plot_y_lab',
-                                     "label of Y axis",
-                                     'value'), ),
-                    column(3,
-                           textInput(
-                               'title_prefix',
-                               "Prefix of plot",
-                               "Variable"
-                           ))
+        mainPanel(
+            tabsetPanel(
+                tabPanel('Overview',
+                         includeMarkdown('resource/page/overview.md')),
+                tabPanel('Data Viewer',
+                         DTOutput("df_com")),
+                tabPanel(
+                    'Distribution Determine',
+                    h3('Data Distributions'),
+                    DTOutput('dist_detect'),
+                    h3('Comparation Method'),
+                    DTOutput('analysis_method'),
+                    h3('Density Plot'),
+                    plotlyOutput("df_hist")
                 ),
-                fluidRow(column(
-                    3,
-                    selectInput(
-                        'pairwise_display',
-                        'Which pairwise comparisons to display?',
-                        choices = c(
-                            'Significant' = 'significant',
-                            'All' = 'all',
-                            'Non-significant' = 'non-significant'
+                tabPanel(
+                    'Comparisons',
+                    h3('Difference test between groups'),
+                    downloadButton('dl_compare_ls',
+                                   'Download'),
+                    DTOutput('compare_ls'),
+                    ########################################
+                    # Why don't use the DT tool button?
+                    # Becasue the DT solve data table works
+                    # on the server rather than local by
+                    # default.
+                    #
+                    # We can use the server = FALSE to load
+                    # all the data to local, but once the
+                    # data is a super large table, or
+                    # your device is not high performance,
+                    # it will frozen the browser or cause
+                    # some crash.
+                    #
+                    # So, we seperate the DT and Download
+                    # to make things work well.
+                    ########################################
+                    downloadButton('dl_compare_table',
+                                   'Download'),
+                    DTOutput('compare_table'),
+                    h3('Post-Hoc Tests'),
+                    fluidRow(
+                        column(3,
+                               textInput(
+                                   'plot_x_lab',
+                                   "label of X axis",
+                                   'Treatment'
+                               )),
+                        column(3,
+                               textInput('plot_y_lab',
+                                         "label of Y axis",
+                                         'value'), ),
+                        column(3,
+                               textInput(
+                                   'title_prefix',
+                                   "Prefix of plot",
+                                   "Variable"
+                               ))
+                    ),
+                    fluidRow(column(
+                        3,
+                        selectInput(
+                            'pairwise_display',
+                            'Which pairwise comparisons to display?',
+                            choices = c(
+                                'Significant' = 'significant',
+                                'All' = 'all',
+                                'Non-significant' = 'non-significant'
+                            ),
+                            selected = 'significant'
+                        )
+                    ),
+                    column(
+                        3,
+                        selectInput(
+                            'pairwise_annotation',
+                            'Annotations to use for pairwise comparisons',
+                            choices = c("p.value",
+                                        "asterisk"),
+                            selected = 'asterisk'
+                        )
+                    )),
+                    fluidRow(
+                        column(
+                            3,
+                            numericInput(
+                                'figure_ncol',
+                                'Figure numbers per row (up to 10)',
+                                min = 1,
+                                max = 10,
+                                value = 3
+                            )
                         ),
-                        selected = 'significant'
-                    )
+                        column(
+                            3,
+                            numericInput(
+                                'figure_width',
+                                'Downloaded figure width (inch)',
+                                min = 3,
+                                max = 20,
+                                value = 12
+                            )
+                        ),
+                        column(
+                            3,
+                            numericInput(
+                                'figure_height',
+                                'Downloaded figure height (inch)',
+                                min = 3,
+                                max = 20,
+                                value = 10
+                            )
+                        )
+                    ),
+                    p(
+                        'Once setting parameter up, click',
+                        strong('Plot Start'),
+                        'to plot figure or click',
+                        strong('Download Figure'),
+                        'to download it directly.'
+                    ),
+                    p(
+                        'P.S. showing figure on this page and downloading figure implement in different code, even the figure in browser lookes massy or wired, the downloaded figure still can meet the standar of publication level with appropriate parameter sets.'
+                    ),
+                    actionButton(
+                        'plot_figure',
+                        label = 'Plot Start',
+                        icon = icon('paint-roller')
+                    ),
+                    downloadButton('dl_gg', label = 'Download Figure'),
+                    plotOutput('gg_post_hoc', width = 'auto'),
                 ),
-                column(
-                    3,
-                    selectInput(
-                        'pairwise_annotation',
-                        'Annotations to use for pairwise comparisons',
-                        choices = c("p.value",
-                                    "asterisk"),
-                        selected = 'asterisk'
-                    )
-                )),
-                fluidRow(column(
-                    3,
-                    numericInput(
-                        'figure_ncol',
-                        'Figure numbers per row (up to 10)',
-                        min = 1,
-                        max = 10,
-                        value = 3
-                    )
-                ),
-                column(
-                    3,
-                    numericInput(
-                        'figure_width',
-                        'Downloaded figure width (inch)',
-                        min = 3,
-                        max = 20,
-                        value = 12
-                    )
-                ),
-                column(
-                    3,
-                    numericInput(
-                        'figure_height',
-                        'Downloaded figure height (inch)',
-                        min = 3,
-                        max = 20,
-                        value = 10
-                    )
-                )),
-                p('Once setting parameter up, click', strong('Plot Start'), 'to plot figure or click', strong('Download Figure'),'to download it directly.'),
-                p('P.S. showing figure on this page and downloading figure implement in different code, even the figure in browser lookes massy or wired, the downloaded figure still can meet the standar of publication level with appropriate parameter sets.'),
-                actionButton(
-                    'plot_figure',
-                    label = 'Plot Start',
-                    icon = icon('paint-roller')
-                ),
-                downloadButton('dl_gg', label = 'Download Figure'),
-                plotOutput('gg_post_hoc', width = 'auto'),
-            ),
-            tabPanel(
-                'Acknowledgements & References',
-                 includeMarkdown('resource/page/acknowledgements.md')
+                tabPanel(
+                    'Acknowledgements & References',
+                    includeMarkdown('resource/page/acknowledgements.md')
+                )
             )
-        ))
+        )
     )
 )
 
@@ -386,22 +405,34 @@ server <- function(input, output) {
     rct_compare_ls <- reactive({
         map2(rct_analysis_method(), rct_df_data()[, -1], function(x, y) {
             if (x == 'Nonparametric tests') {
-                ########################################
-                # nonparametric test method choice
-                #
-                # wilcox tests family was only
-                # suitable for two treatment or groups.
-                # once there are triple or more groups
-                # kruskal.test is an alternative
-                ########################################
-                if (length(unique(rct_df_data()[, 1][[1]])) == 2) {
-                    wilcox.test(y ~ rct_df_data()[, 1][[1]], na.action = na.omit) %>%
-                        broom::glance() %>%
-                        select('statistic', 'p.value', 'df' = 'parameter', 'method')
+                if (input$non_par_method == 'perm') {
+                    independence_test(y ~ as.factor(rct_df_data()[, 1][[1]]),
+                                      distribution = approximate(nresample = 9999)) %>%
+                        glance_coin()
                 } else {
-                    kruskal.test(y, rct_df_data()[, 1][[1]], na.action = na.omit) %>%
-                        broom::glance() %>%
-                        select('statistic', 'p.value', 'df' = 'parameter', 'method')
+                    ########################################
+                    # nonparametric test method choice
+                    #
+                    # wilcox tests family was only
+                    # suitable for two treatment or groups.
+                    # once there are triple or more groups
+                    # kruskal.test is an alternative
+                    ########################################
+                    if (length(unique(rct_df_data()[, 1][[1]])) == 2) {
+                        wilcox.test(y ~ rct_df_data()[, 1][[1]], na.action = na.omit) %>%
+                            broom::glance() %>%
+                            select('statistic',
+                                   'p.value',
+                                   'df' = 'parameter',
+                                   'method')
+                    } else {
+                        kruskal.test(y, rct_df_data()[, 1][[1]], na.action = na.omit) %>%
+                            broom::glance() %>%
+                            select('statistic',
+                                   'p.value',
+                                   'df' = 'parameter',
+                                   'method')
+                    }
                 }
             } else {
                 ########################################
@@ -413,7 +444,7 @@ server <- function(input, output) {
                 aov(y ~ rct_df_data()[, 1][[1]], na.action = na.omit) %>%
                     broom::glance() %>%
                     select('statistic', 'p.value', 'df') %>%
-                    bind_cols(method = 'ANOVA')
+                    mutate(method = 'ANOVA')
             }
         }) %>%
             bind_rows() %>%
@@ -432,15 +463,15 @@ server <- function(input, output) {
     ########################################
     
     rct_compare_table <- reactive({
-        map2(colnames(rct_df_data()[,-1]),rct_df_data()[,-1], function(x, y){
-            bind_cols(rct_df_data()[,1], var = y) %>%
+        map2(colnames(rct_df_data()[,-1]), rct_df_data()[,-1], function(x, y) {
+            bind_cols(rct_df_data()[, 1], var = y) %>%
                 group_by(Treatment) %>%
                 summarize(
                     Mean = mean(var),
                     SE = sd(var),
                     Median = median(var),
                     IQR = IQR(var)
-                ) %>% 
+                ) %>%
                 bind_cols(Variable = x, .)
         }) %>%
             bind_rows()
@@ -530,8 +561,7 @@ server <- function(input, output) {
             }
         })
     event_rct_gg_post_hoc <- eventReactive(input$plot_figure,
-                                           rct_gg_post_hoc()
-                                           )
+                                           rct_gg_post_hoc())
     
     output$compare_ls <-
         renderDT({
@@ -572,10 +602,12 @@ server <- function(input, output) {
         downloadHandler(
             filename = "post_hoc_figure.pdf",
             content = function(file) {
-                ggsave(file,
-                       plot = rct_gg_post_hoc(),
-                       width = input$figure_width,
-                       height = input$figure_height)
+                ggsave(
+                    file,
+                    plot = rct_gg_post_hoc(),
+                    width = input$figure_width,
+                    height = input$figure_height
+                )
             }
         )
 }
