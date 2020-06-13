@@ -60,8 +60,17 @@ ui <- fluidPage(
             ),
             selectInput('non_par_method',
                         'Test method for non-parametric tests',
-                        choices = c('u test', 'Monte Carlo Permutation tests' = 'perm'),
-                        selected = 'perm')
+                        choices = c('Rank Test', 'Monte Carlo Permutation Tests' = 'perm'),
+                        selected = 'perm'),
+            conditionalPanel(
+                condition = "input.non_par_method == 'perm’",
+                sliderInput('perm_time',
+                            'Permutation Times',
+                            min = 9999,
+                            max = 99999,
+                            value = 9999,
+                            step = 10000)
+            )
         ),
         
         # Show a plot of the generated distribution
@@ -407,7 +416,7 @@ server <- function(input, output) {
             if (x == 'Nonparametric tests') {
                 if (input$non_par_method == 'perm') {
                     independence_test(y ~ as.factor(rct_df_data()[, 1][[1]]),
-                                      distribution = approximate(nresample = 9999)) %>%
+                                      distribution = approximate(nresample = input$perm_time)) %>%
                         glance_coin()
                 } else {
                     ########################################
