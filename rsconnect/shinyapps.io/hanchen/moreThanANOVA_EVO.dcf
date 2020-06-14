@@ -1,0 +1,13 @@
+name: moreThanANOVA_EVO
+title: moreThanANOVA_EVO
+username:
+account: hanchen
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 2454179
+bundleId: 3269247
+url: https://hanchen.shinyapps.io/moreThanANOVA_EVO/
+when: 1592168773.30294
+asMultiple: FALSE
+asStatic: FALSE
+ignoredFiles: .RData|post.pdf|README.html|test/ggstat.R|test/ind_perm.R|test/Untitled.R
