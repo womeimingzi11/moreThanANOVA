@@ -18,7 +18,8 @@ library(coin)
 library(broom)
 library(ggstatsplot)
 library(cowplot)
-
+library(rcompanion)
+library(multcompView)
 
 # Define UI for application that draws a histogram
 ui <- fluidPage(
@@ -479,15 +480,41 @@ server <- function(input, output) {
     
     rct_compare_table <- reactive({
         map2(colnames(rct_df_data()[, -1]), rct_df_data()[, -1], function(x, y) {
-            bind_cols(rct_df_data()[, 1], var = y) %>%
+            df_tr_var  <-
+                bind_cols(rct_df_data()[, 1], var = y)
+            
+            df_comp_ls <-
+                df_tr_var %>%
                 group_by(Treatment) %>%
                 summarize(
                     Mean = mean(var),
                     SE = sd(var),
                     Median = median(var),
                     IQR = IQR(var)
-                ) %>%
-                bind_cols(Variable = x, .)
+                )
+            
+            ls_perm_res <-
+                pairwisePermutationMatrix(var~Treatment,
+                                          data = df_tr_var,
+                                          method=input$p_adjust_method)
+            
+            df_pair_perm <- 
+                multcompLetters(ls_perm_res$Adjusted,
+                                # compare="<",
+                                threshold=0.05,
+                                Letters=letters,
+                                reversed = FALSE)
+            
+            bind_cols(
+                list(
+                    Variable = 'x',
+                    df_comp_ls,
+                    sig_level = df_pair_perm$Letters
+                )
+            )
+# 
+#             %>%
+#                 bind_cols(Variable = x, .)
         }) %>%
             bind_rows()
     })

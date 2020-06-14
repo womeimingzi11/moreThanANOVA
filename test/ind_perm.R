@@ -18,3 +18,4 @@ aov(y ~ df_data[, 1][[1]], na.action = na.omit) %>%
   broom::glance() %>%
   select('statistic', 'p.value', 'df') %>%
   mutate(method = 'ANOVA')
+

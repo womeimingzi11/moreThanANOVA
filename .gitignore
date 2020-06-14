@@ -2,8 +2,10 @@
 .Rhistory
 .RData
 .Ruserdata
-Untitled.R
-ggstat.R
 *.html
 *.DS_Store
 *.pdf
+ind_perm.R
+Untitled.R
+ggstat.R
+post_hoc_letters.R
