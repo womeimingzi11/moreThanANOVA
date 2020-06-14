@@ -16,10 +16,11 @@ library(DT)
 library(tidyverse)
 library(coin)
 library(broom)
-library(ggstatsplot)
-library(cowplot)
 library(rcompanion)
 library(multcompView)
+library(ggstatsplot)
+library(cowplot)
+
 
 # Define UI for application that draws a histogram
 ui <- fluidPage(
@@ -47,6 +48,7 @@ ui <- fluidPage(
     sidebarLayout(
         sidebarPanel(
             img(src = "table_str.png", width = "100%"),
+            h4('Data Source'),
             radioButtons(
                 'data_source',
                 'Upload files or try the demo',
@@ -59,12 +61,14 @@ ui <- fluidPage(
                 fileInput('df_upload_file',
                           'Please upload your data')
             ),
+            h4('Difference test between groups'),
             selectInput(
                 'non_par_method',
                 'Test method for non-parametric tests',
                 choices = c('Rank Test', 'Monte Carlo Permutation Tests' = 'perm'),
                 selected = 'perm'
             ),
+            h4('Post-Hoc Tests'),
             selectInput(
                 'p_adjust_method',
                 'Adjustment method for p-value for multiple comparisons.',
@@ -79,6 +83,13 @@ ui <- fluidPage(
                     "none"
                 ),
                 selected = 'fdr'
+            ),
+            p(
+                "The details of adjustment method fo p-value for multiple comparisons",
+                a(href = 'https://www.rdocumentation.org/packages/stats/versions/3.6.2/topics/p.adjust',
+                  'can be found here'),
+                'You can also found them from the vignette of',
+                code('stat::p.adjust')
             )
         ),
         
@@ -135,7 +146,19 @@ ui <- fluidPage(
                         textInput('plot_y_lab',
                                   "label of Y axis",
                                   'value'),
-                    )),
+                    ),
+                    column(
+                        3,
+                        selectInput(
+                            'cow_lab',
+                            "label of each plot",
+                            choices = c(
+                                'UPPER CASE' = "AUTO",
+                                'lower case' = "auto"
+                            ),
+                            selected = 'auto'),
+                    )
+                    ),
                     fluidRow(column(
                         3,
                         selectInput(
@@ -599,7 +622,8 @@ server <- function(input, output) {
                     plot_grid(
                         plotlist = .,
                         ncol = input$figure_ncol,
-                        align = 'h'
+                        align = 'h',
+                        labels = input$cow_lab
                     )
             }
         })
