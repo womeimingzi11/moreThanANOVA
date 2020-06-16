@@ -538,7 +538,7 @@ ui <- fluidPage(
                     )
                 
                 bind_cols(list(
-                    Variable = 'x',
+                    Variable = x,
                     df_comp_ls,
                     sig_level = df_pair_perm$Letters
                 ))
