@@ -5,4 +5,5 @@
 *.html
 *.DS_Store
 *.pdf
-/test/
+rsconnect/
+test/
