@@ -451,7 +451,7 @@ ui <- fluidPage(
             map2(rct_analysis_method(), rct_df_data()[,-1], function(x, y) {
                 if (x == 'Nonparametric tests') {
                     if (input$non_par_method == 'perm') {
-                        independence_test(y ~ rct_df_data()[[1]],
+                        independence_test(y ~ factor(rct_df_data()[[1]]),
                                           distribution = approximate(nresample = 9999)) %>%
                             glance_coin()
                     } else {
@@ -469,14 +469,16 @@ ui <- fluidPage(
                                 select('statistic',
                                        'p.value',
                                        'df' = 'parameter',
-                                       'method')
+                                       'method')%>%
+                                mutate(df = as.character(df))
                         } else {
                             kruskal.test(y, rct_df_data()[[1]], na.action = na.omit) %>%
                                 broom::glance() %>%
                                 select('statistic',
                                        'p.value',
                                        'df' = 'parameter',
-                                       'method')
+                                       'method')%>%
+                                mutate(df = as.character(df))
                         }
                     }
                     
@@ -490,7 +492,8 @@ ui <- fluidPage(
                     aov(y ~ rct_df_data()[[1]], na.action = na.omit) %>%
                         broom::glance() %>%
                         select('statistic', 'p.value', 'df') %>%
-                        bind_cols(method = 'ANOVA')
+                        bind_cols(method = 'ANOVA')%>%
+                        mutate(df = as.character(df))
                 }
             }) %>%
                 bind_rows() %>%
