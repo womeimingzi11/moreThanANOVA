@@ -51,7 +51,7 @@ ui <- fluidPage(
                             )
                      ),
                      column(6,
-                            h6('Update version: 20600616')
+                            h6('Update version: 20200628')
                      )
                  ),
                  includeMarkdown('resource/page/overview.md')),
