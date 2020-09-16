@@ -23,7 +23,7 @@ library(cowplot)
 
 # Fix font of CJK
 library(showtext)
-library(showtextdb)
+# library(showtextdb)
 
 # Define UI for application that draws a histogram
 ui <- fluidPage(
@@ -253,7 +253,7 @@ ui <- fluidPage(
     # Sidebar with a slider input for number of bins)
     # Define server logic required to draw a histogram
     server <- function(input, output) {
-        font_install(source_han_sans())
+        # font_install(source_han_sans())
         source('R/glance_coin.R')
         ########################################
         # Data Viewer
@@ -634,7 +634,7 @@ ui <- fluidPage(
                                     # ggplot theme
                                     ggplot.component = theme(
                                         text = element_text(
-                                            family = 'source-han-sans-cn'
+                                            family = 'wqy-microhei'
                                         )
                                     )
                                 )
@@ -690,6 +690,7 @@ ui <- fluidPage(
             downloadHandler(
                 filename = "post_hoc_figure.pdf",
                 content = function(file) {
+                    showtext_auto()
                     ggsave(
                         file,
                         plot = rct_gg_post_hoc(),
