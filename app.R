@@ -21,6 +21,9 @@ library(multcompView)
 library(ggstatsplot)
 library(cowplot)
 
+# Fix font of CJK
+library(showtext)
+library(showtextdb)
 
 # Define UI for application that draws a histogram
 ui <- fluidPage(
@@ -250,6 +253,7 @@ ui <- fluidPage(
     # Sidebar with a slider input for number of bins)
     # Define server logic required to draw a histogram
     server <- function(input, output) {
+        font_install(source_han_sans())
         source('R/glance_coin.R')
         ########################################
         # Data Viewer
@@ -601,6 +605,7 @@ ui <- fluidPage(
                                 } else {
                                     analysis_method = 'parametric'
                                 }
+                                showtext_auto()
                                 ggbetweenstats(
                                     data =
                                         y,
@@ -625,7 +630,13 @@ ui <- fluidPage(
                                     pairwise.display = input$pairwise_display,
                                     pairwise.annotation = input$pairwise_annotation,
                                     # title.prefix = input$title_prefix,
-                                    p.adjust.method = input$p_adjust_method
+                                    p.adjust.method = input$p_adjust_method,
+                                    # ggplot theme
+                                    ggplot.component = theme(
+                                        text = element_text(
+                                            family = 'source-han-sans-cn'
+                                        )
+                                    )
                                 )
                             })
                         }) %>%
