@@ -360,16 +360,67 @@ server <- function(input, output) {
     ########################################
     
     rct_analysis_method <- reactive({
+        # to determine use the parametric or nonparametric tests
+        nt_or_pt =
         rct_dist_detect()[, -1] %>%
-            sapply(function(variable) {
+            lapply(function(variable) {
                 if_else(any(str_detect(variable, 'non-normal')),
                         'Nonparametric tests',
                         'Parametric tests')
-            }) %>%
-            t() %>%
+            })
+        # to determine the number of treatment
+        # and whether the sample numbers of each treatment
+        # is equal or not
+        sum_df <-
+            rct_df_data() %>%
+            pivot_longer(-Treatment) %>%
+            group_by(name) %>%
+            count(Treatment) %>%
+            nest(-name) %>% 
+            # set the level of name as the order of nt_or_pt
+            # to make sure that all tests are matched
+            mutate(
+                name = factor(name, levels = names(nt_or_pt))
+            ) %>% 
+            arrange(name)
+        
+        condition_ls <- 
+            lapply(sum_df$data, function(ind_sum_df) {
+                tibble(Treatment_num = length(ind_sum_df$Treatment),
+                       is_paired = length(unique(ind_sum_df$n)) == 1
+                )
+            })
+        
+        # determine the detailed test method
+        map2(nt_or_pt, condition_ls, function(x, y){
+            if(x == 'Parametric tests'){
+                if(y$Treatment_num == 2){
+                    'Student t-test'
+                } else {
+                    'ANOVA'
+                }
+            } else {
+                if(y$Treatment_num == 2){
+                    if(y$is_paired){
+                        'Wilcoxon Signed Rank test'
+                    } else {
+                        'Wilcoxon Rank Sum test'
+                    }
+                } else {
+                    'Kruskal–Wallis H test'
+                }
+            }
+        }) %>% 
+            as.data.frame() %>% 
             as_tibble()
+            # sapply(function(variable) {
+            #     if_else(any(str_detect(variable, 'non-normal')),
+            #             'Nonparametric tests',
+            #             'Parametric tests')
+            # }) %>%
+            # t() %>%
+            # as_tibble()
     })
-    
     ########################################
     # 3. we plot the histgram of each
     #    variable by each treatment.
