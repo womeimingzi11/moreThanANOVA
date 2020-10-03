@@ -667,9 +667,16 @@ server <- function(input, output) {
                                 detail = 'This may take a while...',
                                 value = 1
                             )
-                            if (x == 'Nonparametric tests') {
+                            if (x %in% 
+                                c('Wilcoxon Signed Rank test',
+                                  'Wilcoxon Rank Sum test',
+                                  'Kruskal–Wallis H test')
+                                ) {
                                 analysis_method = 'nonparametric'
                             } else {
+                                # In ggstatsplot, parametric test will performed by
+                                # games howell post-hoc test
+                                # This is similar to tukey-karmer test
                                 analysis_method = 'parametric'
                             }
                             showtext_auto()
