@@ -362,7 +362,7 @@ server <- function(input, output) {
     rct_analysis_method <- reactive({
         # to determine use the parametric or nonparametric tests
         nt_or_pt =
-        rct_dist_detect()[, -1] %>%
+            rct_dist_detect()[, -1] %>%
             lapply(function(variable) {
                 if_else(any(str_detect(variable, 'non-normal')),
                         'Nonparametric tests',
@@ -376,32 +376,31 @@ server <- function(input, output) {
             pivot_longer(-Treatment) %>%
             group_by(name) %>%
             count(Treatment) %>%
-            nest(-name) %>% 
+            nest(-name) %>%
             # set the level of name as the order of nt_or_pt
             # to make sure that all tests are matched
-            mutate(
-                name = factor(name, levels = names(nt_or_pt))
-            ) %>% 
+            mutate(name = factor(name, levels = names(nt_or_pt))) %>%
             arrange(name)
         
-        condition_ls <- 
+        condition_ls <-
             lapply(sum_df$data, function(ind_sum_df) {
-                tibble(Treatment_num = length(ind_sum_df$Treatment),
-                       is_paired = length(unique(ind_sum_df$n)) == 1
+                tibble(
+                    Treatment_num = length(ind_sum_df$Treatment),
+                    is_paired = length(unique(ind_sum_df$n)) == 1
                 )
             })
         
         # determine the detailed test method
-        map2(nt_or_pt, condition_ls, function(x, y){
-            if(x == 'Parametric tests'){
-                if(y$Treatment_num == 2){
+        map2(nt_or_pt, condition_ls, function(x, y) {
+            if (x == 'Parametric tests') {
+                if (y$Treatment_num == 2) {
                     'Student t-test'
                 } else {
                     'ANOVA'
                 }
             } else {
-                if(y$Treatment_num == 2){
-                    if(y$is_paired){
+                if (y$Treatment_num == 2) {
+                    if (y$is_paired) {
                         'Wilcoxon Signed Rank test'
                     } else {
                         'Wilcoxon Rank Sum test'
@@ -410,16 +409,16 @@ server <- function(input, output) {
                     'Kruskal–Wallis H test'
                 }
             }
-        }) %>% 
-            as.data.frame() %>% 
+        }) %>%
+            as.data.frame() %>%
             as_tibble()
-            # sapply(function(variable) {
-            #     if_else(any(str_detect(variable, 'non-normal')),
-            #             'Nonparametric tests',
-            #             'Parametric tests')
-            # }) %>%
-            # t() %>%
-            # as_tibble()
+        # sapply(function(variable) {
+        #     if_else(any(str_detect(variable, 'non-normal')),
+        #             'Nonparametric tests',
+        #             'Parametric tests')
+        # }) %>%
+        # t() %>%
+        # as_tibble()
     })
     ########################################
     # 3. we plot the histgram of each
@@ -507,7 +506,13 @@ server <- function(input, output) {
     ########################################
     rct_compare_ls <- reactive({
         map2(rct_analysis_method(), rct_df_data()[,-1], function(x, y) {
-            if (x == 'Nonparametric tests') {
+            # To detect whether sig test is nonparm or parm test
+            # if parm, permutation test can be detected
+            if (x %in% c(
+                'Wilcoxon Signed Rank test',
+                'Wilcoxon Rank Sum test',
+                'Kruskal–Wallis H test'
+            )) {
                 if (input$non_par_method == 'perm') {
                     independence_test(y ~ factor(rct_df_data()[[1]]),
                                       distribution = approximate(nresample = 9999)) %>%
@@ -521,7 +526,9 @@ server <- function(input, output) {
                     # once there are triple or more groups
                     # kruskal.test is an alternative
                     ########################################
-                    if (length(unique(rct_df_data()[[1]])) == 2) {
+                    if (x %in% c('Wilcoxon Signed Rank test',
+                                 'Wilcoxon Rank Sum test')) {
+                        # wilcox will automatically determine which method is suitable
                         wilcox.test(y ~ rct_df_data()[[1]], na.action = na.omit) %>%
                             broom::glance() %>%
                             select('statistic',
@@ -530,6 +537,7 @@ server <- function(input, output) {
                                    'method') %>%
                             mutate(df = as.character(df))
                     } else {
+                        # the fallback method is kruskal.test
                         kruskal.test(y, rct_df_data()[[1]], na.action = na.omit) %>%
                             broom::glance() %>%
                             select('statistic',
@@ -538,26 +546,31 @@ server <- function(input, output) {
                                    'method') %>%
                             mutate(df = as.character(df))
                     }
-                }
-                
-            } else {
-                ########################################
-                # The result of ANOVA does not contain
-                # method, however, the only possible
-                # mehod is "ANOVA", so we can fill it
-                # manually
-                ########################################
-                aov(y ~ rct_df_data()[[1]], na.action = na.omit) %>%
-                    broom::glance() %>%
-                    select('statistic', 'p.value', 'df') %>%
-                    bind_cols(method = 'ANOVA') %>%
-                    mutate(df = as.character(df))
-            }
-        }) %>%
+                }} else if (x == 'ANOVA') {
+                    ########################################
+                    # The result of ANOVA does not contain
+                    # method, however, the only possible
+                    # mehod is "ANOVA", so we can fill it
+                    # manually
+                    ########################################
+                    aov(y ~ rct_df_data()[[1]], na.action = na.omit) %>%
+                        broom::glance() %>%
+                        select('statistic', 'p.value', 'df') %>%
+                        bind_cols(method = 'ANOVA') %>%
+                        mutate(df = as.character(df))
+                } else {(
+                    # for param which is not met the standard of anova
+                    # t-test will be performed
+                    t.test(y ~ rct_df_data()[[1]], na.action = na.omit) %>% 
+                        broom::glance() %>%
+                        select('statistic', 'p.value', df = parameter, 'method') %>% 
+                        mutate(df = as.character(df))
+                )}
+            }) %>%
             bind_rows() %>%
             bind_cols(tibble(variable = colnames(rct_analysis_method())),
                       .)
-    })
+        })
     
     ########################################
     # 2. compare data across treatments,
@@ -749,7 +762,7 @@ server <- function(input, output) {
                 )
             }
         )
-}
-
-# Run the application
-shinyApp(ui = ui, server = server)
+    }
+    
+    # Run the application
+    shinyApp(ui = ui, server = server)
