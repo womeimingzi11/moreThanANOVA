@@ -44,18 +44,18 @@ ui <- fluidPage(
         # id = "main_navbar",
         tabPanel(
             'Overview',
-            fluidRow(column(3,
+            fluidRow(column(5,
                             h4(
-                                'Creator:',
-                                a(href = "https://womeimingzi11.github.io", 'Han Chen')
+                                'Author:',
+                                a(href = "https://womeimingzi11.github.io", 'Han Chen, Wanyanhan Jiang')
                             )),
                      column(3,
                             h5(
                                 a(href = "mailto://chenhan28@gmail.com", 'chenhan28@gmail.com')
                             )),
-                     column(6,
+                     column(3,
                             h6(
-                                'Update version: 20201003'
+                                'Version: 20201008'
                             ))),
             includeMarkdown('resource/page/overview.md')
         ),
@@ -81,9 +81,9 @@ ui <- fluidPage(
                              'non_par_method',
                              'Test method for non-parametric tests',
                              choices = c('Rank Test', 'Monte Carlo Permutation Tests' = 'perm'),
-                             selected = 'perm'
+                             selected = 'Rank Test'
                          ),
-                         h4('Post-Hoc Tests'),
+                         h4('Post-Hoc Test'),
                          selectInput(
                              'p_adjust_method',
                              'Adjustment method for p-value for multiple comparisons.',
@@ -97,7 +97,7 @@ ui <- fluidPage(
                                  "fdr",
                                  "none"
                              ),
-                             selected = 'fdr'
+                             selected = 'bonferroni'
                          ),
                          p(
                              "The details of adjustment method fo p-value for multiple comparisons",
@@ -113,8 +113,8 @@ ui <- fluidPage(
                          tabPanel('Data Viewer',
                                   DTOutput("df_com")),
                          tabPanel(
-                             'Data Distribution',
-                             h3('Data Distributions'),
+                             'Data Analysis',
+                             h3('Data Distribution'),
                              DTOutput('dist_detect'),
                              h3('Comparison Method'),
                              DTOutput('analysis_method'),
@@ -147,7 +147,7 @@ ui <- fluidPage(
                              downloadButton('dl_compare_table',
                                             'Download'),
                              DTOutput('compare_table'),
-                             h3('Post-Hoc Tests'),
+                             h3('Post-Hoc Test'),
                              fluidRow(
                                  column(3,
                                         textInput(
