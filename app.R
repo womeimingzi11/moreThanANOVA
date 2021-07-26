@@ -6,7 +6,9 @@
 #
 #    http://shiny.rstudio.com/
 #
-
+# Package to fix error from shinyapps.io
+library(markdown)
+#
 # Package for Shiny
 library(shiny)
 library(shinythemes)
@@ -368,7 +370,7 @@ server <- function(input, output) {
     #    test.
     #
     #    Once a skewed distribution is
-    #    found in a treatment in each
+    #    found in each
     #    variable, the parametric test is
     #    not suitable any more.
     #    This reactive function is called
@@ -430,61 +432,26 @@ server <- function(input, output) {
         }) %>%
             as.data.frame() %>%
             as_tibble()
-        # sapply(function(variable) {
-        #     if_else(any(str_detect(variable, 'non-normal')),
-        #             'Nonparametric tests',
-        #             'Parametric tests')
-        # }) %>%
-        # t() %>%
-        # as_tibble()
     })
     ########################################
     # 3. we plot the histgram of each
-    #    variable by each treatment.
+    #    variable.
     #    This reactive function is called
     #    rct_df_hist
     #    return: ggobject
     #    render: plot
     #    structure:
-    #       row: Treatment
-    #       col: name (Variable)
+    #       wrap: name (Variable)
     #       axes: both x and y are free
     ########################################
     
-    ########################################
-    # Tame data by Treatment,
-    # It will be used in rct_df_data_by_tr
-    # (distribution plot) and
-    # rct_gg_post_hoc (post hoc tests).
-    # therefore, we wrap it up as reactive
-    # function
-    ########################################
-    rct_df_data_by_tr <- reactive({
-        rct_df_data() %>%
-            pivot_longer(-Treatment) %>%
-            ########################################
-        # To make the orders of figure follow
-        # the input table.
-        # We convert the variable name into
-        # factor and control the order of plot
-        # by the level
-        ########################################
-        dplyr::mutate(name =
-                          factor(name,
-                                 levels = colnames(rct_df_data()) %>%
-                                     .[-1]))
-    })
-    
     rct_df_hist <- reactive({
-        rct_df_data_by_tr() %>%
+        rct_df_data()[,-1] %>%
+            pivot_longer(everything()) %>% 
             ggplot(aes(value)) +
-            # geom_histogram() +
             geom_density(fill = 'skyblue') +
-            facet_grid(
-                rows = vars(Treatment),
-                cols = vars(name),
-                scales = 'free'
-            ) +
+            facet_wrap(vars(name),
+                       scales = 'free') +
             theme_classic()
     })
     
@@ -668,12 +635,29 @@ server <- function(input, output) {
                     return('Please set label of X axis')
                 }
                 
-                # if (input$y_lab_source == 'text') {
-                #     if (is.null(input$plot_y_lab)) {
-                #         stop('Please set label of Y axis')
-                #     }
-                #     post_hoc_data$name == input$plot_y_lab
-                # }
+                ########################################
+                # Tame data by Treatment,
+                # It will be used in rct_df_data_by_tr
+                # (distribution plot) and
+                # rct_gg_post_hoc (post hoc tests).
+                # therefore, we wrap it up as reactive
+                # function
+                ########################################
+                rct_df_data_by_tr <- reactive({
+                    rct_df_data() %>%
+                        pivot_longer(-Treatment) %>%
+                        ########################################
+                        # To make the orders of figure follow
+                        # the input table.
+                        # We convert the variable name into
+                        # factor and control the order of plot
+                        # by the level
+                        ########################################
+                        dplyr::mutate(name =
+                                          factor(name,
+                                                 levels = colnames(rct_df_data()) %>%
+                                                     .[-1]))
+                })
                 
                 post_hoc_data <-
                     rct_df_data_by_tr() %>%
