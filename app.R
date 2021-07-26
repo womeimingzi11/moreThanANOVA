@@ -580,7 +580,8 @@ server <- function(input, output) {
                     # manually
                     ########################################
                     aov(y ~ rct_df_data()[[1]], na.action = na.omit) %>%
-                        broom::glance() %>%
+                        broom::tidy() %>%
+                        filter(term != "Residuals") %>%
                         select('statistic', 'p.value', 'df') %>%
                         bind_cols(method = 'ANOVA') %>%
                         mutate(df = as.character(df))
@@ -611,7 +612,9 @@ server <- function(input, output) {
     rct_compare_table <- reactive({
         map2(colnames(rct_df_data()[, -1]), rct_df_data()[, -1], function(x, y) {
             df_tr_var  <-
-                bind_cols(rct_df_data()[, 1], var = y)
+                bind_cols(Treatment = 
+                              rct_df_data()[, 1], 
+                          var = y)
             
             df_comp_ls <-
                 df_tr_var %>%
