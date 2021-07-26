@@ -14,7 +14,6 @@ library(DT)
 library(shinydisconnect)
 
 # Package for data manipulation
-# library(tidyverse)
 library(tidyr)
 library(dplyr)
 library(purrr)
@@ -307,7 +306,6 @@ server <- function(input, output) {
     ########################################
     rct_df_data <- reactive({
         if (input$data_source == 'demo') {
-            # df <- read_csv('resource/data/df_com_smp.csv')
             df <- select(iris, Species, everything())
             tr_name <- colnames(df)[1]
             rename(df, 'Treatment' = tr_name) %>%
@@ -356,18 +354,12 @@ server <- function(input, output) {
     ########################################
     
     rct_dist_detect <- reactive({
-        nested_data =
-            rct_df_data() %>%
-            nest(-Treatment) %>%
-            dplyr::mutate(distribution = map(data, ~ {
-                sapply(.x, function(variable) {
-                    p_v = shapiro.test(variable) %>%
-                        .[['p.value']]
-                    if_else(p_v > .05, 'normal', 'non-normal')
-                })
-            }))
-        bind_cols(Treatment = nested_data$Treatment,
-                  bind_rows(pull(nested_data, distribution)))
+        rct_df_data()[,-1] %>% 
+            map_dfc(function(col_dat) {
+                p_v = shapiro.test(col_dat) %>%
+                    .[['p.value']]
+                if_else(p_v > .05, 'normal', 'non-normal')
+            })
     })
     
     ########################################
@@ -388,7 +380,7 @@ server <- function(input, output) {
     rct_analysis_method <- reactive({
         # to determine use the parametric or nonparametric tests
         nt_or_pt =
-            rct_dist_detect()[, -1] %>%
+            rct_dist_detect() %>%
             lapply(function(variable) {
                 if_else(any(str_detect(variable, 'non-normal')),
                         'Nonparametric tests',
