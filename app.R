@@ -14,7 +14,13 @@ library(DT)
 library(shinydisconnect)
 
 # Package for data manipulation
-library(tidyverse)
+# library(tidyverse)
+library(tidyr)
+library(dplyr)
+library(purrr)
+library(readr)
+library(stringr)
+library(ggplot2)
 library(broom)
 library(cowplot)
 library(coin)
@@ -55,7 +61,7 @@ ui <- fluidPage(
                             )),
                      column(3,
                             h6(
-                                'Version: 20201008'
+                                'Version: 20210726'
                             ))),
             includeMarkdown('resource/page/overview.md')
         ),
@@ -150,15 +156,34 @@ ui <- fluidPage(
                              h3('Post-Hoc Test'),
                              fluidRow(
                                  column(3,
-                                        textInput(
-                                            'plot_x_lab',
-                                            "label of X axis",
-                                            'Treatment'
-                                        )),
-                                 column(3,
-                                        textInput('plot_y_lab',
-                                                  "label of Y axis",
-                                                  'value'), ),
+                                        # radioButtons(
+                                        #     'x_lab_source',
+                                        #     label = 'Type label or Auto detect',
+                                        #     choices = c("Text" = 'text', 
+                                        #                 "Follow input data" = 'auto'),
+                                        #     selected = 'text'
+                                        # ),
+                                        # conditionalPanel(
+                                            # condition = "input.x_lab_source == 'text'",
+                                            textInput('plot_x_lab',
+                                                      "Label of X axis",
+                                                      'Treatment')
+                                        # )
+                                 ),
+                                 # column(3,
+                                 #        radioButtons(
+                                 #            'y_lab_source',
+                                 #            label = 'Type label or Auto detect',
+                                 #            choices = c("Text" = 'text', 
+                                 #                        "Follow input data" = 'auto'),
+                                 #            selected = 'auto'
+                                 #        ),
+                                 #        conditionalPanel(
+                                 #            condition = "input.y_lab_source == 'text'",
+                                 #            textInput('plot_y_lab',
+                                 #                      "Label of Y axis",
+                                 #                      'value')
+                                 #        )),
                                  column(
                                      3,
                                      selectInput(
@@ -282,7 +307,8 @@ server <- function(input, output) {
     ########################################
     rct_df_data <- reactive({
         if (input$data_source == 'demo') {
-            df <- read_csv('resource/data/df_com_smp.csv')
+            # df <- read_csv('resource/data/df_com_smp.csv')
+            df <- select(iris, Species, everything())
             tr_name <- colnames(df)[1]
             rename(df, 'Treatment' = tr_name) %>%
                 mutate(Treatment = as.factor(Treatment))
@@ -643,15 +669,16 @@ server <- function(input, output) {
     rct_gg_post_hoc <-
         reactive({
             {
-                # if (is.null(input$title_prefix)) {
-                #     return('Please set title prefix')
-                # }
                 if (is.null(input$plot_x_lab)) {
                     return('Please set label of X axis')
                 }
-                if (is.null(input$plot_y_lab)) {
-                    return('Please set label of Y axis')
-                }
+                
+                # if (input$y_lab_source == 'text') {
+                #     if (is.null(input$plot_y_lab)) {
+                #         stop('Please set label of Y axis')
+                #     }
+                #     post_hoc_data$name == input$plot_y_lab
+                # }
                 
                 post_hoc_data <-
                     rct_df_data_by_tr() %>%
@@ -659,8 +686,13 @@ server <- function(input, output) {
                     mutate(data = map2(name, data, function(x, y) {
                         bind_cols(name = x, y)
                     }))
-                rct_analysis_method() %>%
-                    map2(post_hoc_data$data, function(x, y) {
+                
+                list(
+                    rct_analysis_method(),
+                    post_hoc_data$data,
+                    post_hoc_data$name
+                ) %>% 
+                pmap(function(x, y, z) {
                         withProgress(expr = {
                             setProgress(
                                 message = 'Calculation in progress',
@@ -700,10 +732,9 @@ server <- function(input, output) {
                                 # Customized parameter
                                 ########################################
                                 xlab = input$plot_x_lab,
-                                ylab = input$plot_y_lab,
+                                ylab = z,
                                 pairwise.display = input$pairwise_display,
                                 pairwise.annotation = input$pairwise_annotation,
-                                # title.prefix = input$title_prefix,
                                 p.adjust.method = input$p_adjust_method,
                                 # ggplot theme
                                 ggplot.component = theme(text = element_text(family = 'wqy-microhei'))
