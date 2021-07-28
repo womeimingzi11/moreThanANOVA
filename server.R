@@ -139,28 +139,36 @@ server <- function(input, output) {
       lapply(sum_df$data, function(ind_sum_df) {
         tibble(
           Treatment_num = length(ind_sum_df$Treatment),
-          is_paired = length(unique(ind_sum_df$n)) == 1
+          is_equal = length(unique(ind_sum_df$n)) == 1
         )
       })
     
     # determine the detailed test method
     map2(nt_or_pt, condition_ls, function(x, y) {
-      if (x == 'Parametric tests') {
-        if (y$Treatment_num == 2) {
-          'Student t-test'
-        } else {
-          'ANOVA'
-        }
+      if(input$is_perm == 'perm') {
+        "Permutation test"
       } else {
-        if (y$Treatment_num == 2) {
-          if (y$is_paired) {
-            'Wilcoxon Signed Rank test'
+        if (x == 'Parametric tests') {
+          if (y$Treatment_num == 2) {
+            if(y$is_equal & input$try_paired == "paired"){
+              't-test'
+            } else {
+              'Paired t-test'
+            }
           } else {
-            'Wilcoxon Rank Sum test'
+            'ANOVA'
           }
         } else {
-          'Kruskal–Wallis H test'
-        }
+          if (y$Treatment_num == 2) {
+            if (y$is_equal & input$try_paired == "paired") {
+              'Wilcoxon Signed-rank test'
+            } else {
+              'Wilcoxon Rank Sum test'
+            }
+          } else {
+            'Kruskal–Wallis H test'
+          }
+        } 
       }
     }) %>%
       as.data.frame() %>%
@@ -293,65 +301,65 @@ server <- function(input, output) {
     map2(rct_analysis_method(), rct_df_data()[,-1], function(x, y) {
       # To detect whether sig test is nonparm or parm test
       # if parm, permutation test can be detected
-      if (x %in% c(
-        'Wilcoxon Signed Rank test',
-        'Wilcoxon Rank Sum test',
-        'Kruskal–Wallis H test'
-      )) {
-        if (input$non_par_method == 'perm') {
+      switch(
+        x,
+        "Wilcoxon Signed-rank test" =  
+          wilcox.test(y ~ rct_df_data()[[1]], na.action = na.omit, paired = TRUE) %>%
+          broom::glance() %>%
+          select('statistic',
+                 'p.value',
+                 'df' = 'parameter',
+                 'method') %>%
+          mutate(df = as.character(df)),
+        "Wilcoxon Rank Sum test" =
+          wilcox.test(y ~ rct_df_data()[[1]], na.action = na.omit, paired = FALSE) %>%
+          broom::glance() %>%
+          select('statistic',
+                 'p.value',
+                 'df' = 'parameter',
+                 'method') %>%
+          mutate(df = as.character(df)),
+        "Kruskal–Wallis H test" = 
+          # the fallback method is kruskal.test
+          kruskal.test(y, rct_df_data()[[1]], na.action = na.omit) %>%
+          broom::glance() %>%
+          select('statistic',
+                 'p.value',
+                 'df' = 'parameter',
+                 'method') %>%
+          mutate(df = as.character(df)),
+        "Permutation test" =
           independence_test(y ~ factor(rct_df_data()[[1]]),
                             distribution = approximate(nresample = 9999)) %>%
-            glance_coin()
-        } else {
-          ########################################
-          # nonparametric test method choice
-          #
-          # wilcox tests family was only
-          # suitable for two treatment or groups.
-          # once there are triple or more groups
-          # kruskal.test is an alternative
-          ########################################
-          if (x %in% c('Wilcoxon Signed Rank test',
-                       'Wilcoxon Rank Sum test')) {
-            # wilcox will automatically determine which method is suitable
-            wilcox.test(y ~ rct_df_data()[[1]], na.action = na.omit) %>%
-              broom::glance() %>%
-              select('statistic',
-                     'p.value',
-                     'df' = 'parameter',
-                     'method') %>%
-              mutate(df = as.character(df))
-          } else {
-            # the fallback method is kruskal.test
-            kruskal.test(y, rct_df_data()[[1]], na.action = na.omit) %>%
-              broom::glance() %>%
-              select('statistic',
-                     'p.value',
-                     'df' = 'parameter',
-                     'method') %>%
-              mutate(df = as.character(df))
-          }
-        }} else if (x == 'ANOVA') {
-          ########################################
-          # The result of ANOVA does not contain
-          # method, however, the only possible
-          # mehod is "ANOVA", so we can fill it
-          # manually
-          ########################################
-          aov(y ~ rct_df_data()[[1]], na.action = na.omit) %>%
-            broom::tidy() %>%
-            filter(term != "Residuals") %>%
-            select('statistic', 'p.value', 'df') %>%
-            bind_cols(method = 'ANOVA') %>%
-            mutate(df = as.character(df))
-        } else {(
+          glance_coin(),
+        ########################################
+        # The result of ANOVA does not contain
+        # method, however, the only possible
+        # mehod is "ANOVA", so we can fill it
+        # manually
+        ########################################
+        "ANOVA" = 
+        aov(y ~ rct_df_data()[[1]], na.action = na.omit) %>%
+          broom::tidy() %>%
+          filter(term != "Residuals") %>%
+          select('statistic', 'p.value', 'df') %>%
+          bind_cols(method = 'ANOVA') %>%
+          mutate(df = as.character(df)),
+        "t-test" =
+        # for param which is not met the standard of anova
+        # t-test will be performed
+        t.test(y ~ rct_df_data()[[1]], na.action = na.omit, paired = FALSE) %>% 
+          broom::glance() %>%
+          select('statistic', 'p.value', df = parameter, 'method') %>% 
+          mutate(df = as.character(df)),
+        "Paired t-test" =
           # for param which is not met the standard of anova
           # t-test will be performed
-          t.test(y ~ rct_df_data()[[1]], na.action = na.omit) %>% 
-            broom::glance() %>%
-            select('statistic', 'p.value', df = parameter, 'method') %>% 
-            mutate(df = as.character(df))
-        )}
+          t.test(y ~ rct_df_data()[[1]], na.action = na.omit, paired = TRUE) %>% 
+          broom::glance() %>%
+          select('statistic', 'p.value', df = parameter, 'method') %>% 
+          mutate(df = as.character(df))
+      )
     }) %>%
       bind_rows() %>%
       bind_cols(tibble(variable = colnames(rct_analysis_method())),
@@ -404,9 +412,6 @@ server <- function(input, output) {
         df_comp_ls,
         sig_level = df_pair_perm$Letters
       ))
-      #
-      #             %>%
-      #                 bind_cols(Variable = x, .)
     }) %>%
       bind_rows()
   })
@@ -479,7 +484,7 @@ server <- function(input, output) {
                 value = 1
               )
               if (x %in% 
-                  c('Wilcoxon Signed Rank test',
+                  c('Wilcoxon Signed-rank test',
                     'Wilcoxon Rank Sum test',
                     'Kruskal–Wallis H test')
               ) {

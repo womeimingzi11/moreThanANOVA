@@ -84,12 +84,30 @@ ui <- fluidPage(
                    fileInput('df_upload_file',
                              'Please upload your data')
                  ),
+                 h4('Significant level of Shapiro-Wilk test'),
+                 textInput(
+                   'sw_signif_level',
+                   'Set thresheld of Shapiro-Wilk test',
+                   value = "0.05"
+                   ),
+                 h4('One and two sample tests'),
+                 selectInput(
+                   "try_paired",
+                   "Whether you want a paired t-test/Wilcoxon Signed-Rank test?",
+                   choices = c(
+                     'No',
+                     'Paired' = 'paired'
+                   ),
+                   selected = 'No'
+                 ),
+                 helpText("Applicable for cases which each group has same number of observation."),
                  h4('Significance test between groups'),
                  selectInput(
-                   'non_par_method',
-                   'Test method for non-parametric tests',
-                   choices = c('Rank Test', 'Monte Carlo Permutation Tests' = 'perm'),
-                   selected = 'Rank Test'
+                   'is_perm',
+                   'Whether you want a permutation test?',
+                   choices = c('No', 
+                               'Monte Carlo Permutation Tests' = 'perm'),
+                   selected = 'No'
                  ),
                  h4('Post-Hoc Test'),
                  selectInput(
@@ -101,10 +119,10 @@ ui <- fluidPage(
                      p.adjust.methods[[1]],
                      "bonferroni")
                    ),
-                 p(
+                 helpText(
                    "The details of adjustment method fo p-value for multiple comparisons",
                    a(href = 'https://www.rdocumentation.org/packages/stats/versions/3.6.2/topics/p.adjust',
-                     'can be found here'),
+                     'can be found here.'),
                    'You can also found them from the vignette of',
                    code('stat::p.adjust')
                  )
@@ -118,23 +136,15 @@ ui <- fluidPage(
                    'Data Analysis',
                    # h3('Data Distribution'),
                    # Set the significant level of Shapiro-Wilk test of normality
-                   fluidRow(column(
-                     6,
-                     textInput(
-                         'sw_signif_level',
-                         'Significant level of Shapiro-Wilk test',
-                         value = "0.1"
-                       )
-                   )),
                    # DTOutput('dist_detect'),
                    # h3('Comparison Method'),
                    # DTOutput('analysis_method'),
                    h3("Distribution and Method detection"),
-                   helpText("Once a p value < 0.0001, it will display as 0.0000."),
                    DTOutput("df_dist_n_method"),
+                   helpText("Once a p value < 0.0001, it will display as 0.0000."),
                    h3('Density Plot'),
                    plotOutput("ggplot_hist"),
-                   h3('QQ Plot'),
+                   h3('Q-Q Plot'),
                    helpText("quantile-quantie plot, aka. Q-Q plot, ",
                             "is a somewhat subjective visual check. ",
                             "However, it is still a useful tool. ",
