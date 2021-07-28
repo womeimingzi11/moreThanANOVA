@@ -65,22 +65,36 @@ server <- function(input, output) {
   ########################################
   
   ########################################
-  # 1. we check the data frame, at this
-  #    step, we rename the first column as
-  #    Treatment.
+  # 0. check data column by column by
+  #    Shapiro-Wilk Normality Test
+  #    return p value
   #    This reactive function is called
-  #    rct_df_data
+  #    rct_df_sw_test_pv
   #    return: tibble
-  #    render: DT - with Buttons
+  #    render: DT
   ########################################
   
-  rct_dist_detect <- reactive({
+  rct_df_sw_test_pv <- reactive({
     rct_df_data()[,-1] %>% 
       map_dfc(function(col_dat) {
         p_v = shapiro.test(col_dat) %>%
           .[['p.value']]
-        if_else(p_v >= as.numeric(input$sw_signif_level), 'normal', 'non-normal')
       })
+  })
+  
+  ########################################
+  # 1. detect the distribution by sw_pv
+  #    This reactive function is called
+  #    rct_df_data
+  #    return: tibble
+  #    render: DT
+  ########################################
+  
+  rct_dist_detect <- reactive({
+    rct_df_sw_test_pv() %>% 
+      map_dfc(~if_else(.x >= as.numeric(input$sw_signif_level),
+                       'normal', 
+                       'non-normal'))
   })
   
   ########################################
@@ -94,7 +108,7 @@ server <- function(input, output) {
   #    not suitable any more.
   #    This reactive function is called
   #    rct_analysis_method
-  #    return: character vector
+  #    return: tibble
   #    render: DT
   ########################################
   
@@ -152,11 +166,47 @@ server <- function(input, output) {
       as.data.frame() %>%
       as_tibble()
   })
+  
   ########################################
-  # 3. we plot the histgram of each
+  # 3. we combine the tables of 
+  #    distribution and methods selection
+  #    This reactive function is called
+  #    rct_df_dist_n_method
+  #    return: tibble
+  #    render: DT
+  #    colnames: 
+  ########################################
+  rct_df_dist_n_method <- reactive({
+    tb_sw_test_pv_long <-
+      pivot_longer(rct_df_sw_test_pv(), 
+                   everything(),
+                   names_to = "Varible",
+                   values_to = "p.value") %>% 
+      mutate("p.value" = 
+               sprintf("%.4f", `p.value`))
+    
+    tb_dist_detect_long <-
+      pivot_longer(rct_dist_detect(), 
+                   everything(),
+                   names_to = "Varible",
+                   values_to = "Distribution")
+    tb_analysis_method <-
+      pivot_longer(rct_analysis_method(),
+                   everything(),
+                   names_to = "Varible",
+                   values_to = "Method")
+    
+    list(tb_sw_test_pv_long,
+         tb_dist_detect_long, 
+         tb_analysis_method) %>%
+      reduce(left_join, by = "Varible")
+  })
+  
+  ########################################
+  # 4. we plot the histgram of each
   #    variable.
   #    This reactive function is called
-  #    rct_df_hist
+  #    rct_ggplot_hist
   #    return: ggobject
   #    render: plot
   #    structure:
@@ -164,7 +214,7 @@ server <- function(input, output) {
   #       axes: both x and y are free
   ########################################
   
-  rct_df_hist <- reactive({
+  rct_ggplot_hist <- reactive({
     rct_df_data()[,-1] %>%
       pivot_longer(everything()) %>%
       mutate(name = factor(name, levels = unique(name))) %>% 
@@ -176,24 +226,54 @@ server <- function(input, output) {
   })
   
   ########################################
-  # Render
-  #    panel: main - Distribution Determine
-  #    rct_dist_detect - DT
-  #    rct_analysis_method - DT
-  #    rct_df_hist - plot
+  # 5. we plot the qqplot of each
+  #    variable.
+  #    This reactive function is called
+  #    rct_ggplot_qq
+  #    return: ggobject
+  #    render: plot
+  #    structure:
+  #       wrap: name (Variable)
+  #       axes: both x and y are free
   ########################################
   
-  output$dist_detect <-
-    renderDT({
-      rct_dist_detect()
-    })
+  rct_ggplot_qq <- reactive({
+    rct_df_data()[,-1] %>%
+      pivot_longer(everything()) %>%
+      mutate(name = factor(name, levels = unique(name))) %>% 
+      ggplot(aes(sample = value)) +
+      stat_qq() +
+      stat_qq_line() +
+      facet_wrap(vars(name),
+                 scales = 'free') +
+      theme_classic()
+  })
   
-  output$analysis_method <-
-    renderDT(rct_analysis_method())
+  ########################################
+  # Render
+  #    panel: main - Distribution Determine
+  ###    rct_dist_detect - DT
+  ###    rct_analysis_method - DT
+  #    rct_df_dist_n_method - DT
+  #    rct_ggplot_hist - plot
+  #    rct_ggplot_qq - plot
+  ########################################
   
-  output$df_hist <-
-    renderPlot(rct_df_hist())
+  # output$dist_detect <-
+  #   renderDT({
+  #     rct_dist_detect()
+  #   })
+  # 
+  # output$analysis_method <-
+  #   renderDT(rct_analysis_method())
+  output$df_dist_n_method <-
+    renderDT(rct_df_dist_n_method())
   
+  output$ggplot_hist <-
+    renderPlot(rct_ggplot_hist())
+  
+  output$ggplot_qq <-
+    renderPlot(rct_ggplot_qq())
   ########################################
   # comparison
   #
