@@ -79,7 +79,7 @@ server <- function(input, output) {
       map_dfc(function(col_dat) {
         p_v = shapiro.test(col_dat) %>%
           .[['p.value']]
-        if_else(p_v > .05, 'normal', 'non-normal')
+        if_else(p_v >= as.numeric(input$sw_signif_level), 'normal', 'non-normal')
       })
   })
   
@@ -166,7 +166,8 @@ server <- function(input, output) {
   
   rct_df_hist <- reactive({
     rct_df_data()[,-1] %>%
-      pivot_longer(everything()) %>% 
+      pivot_longer(everything()) %>%
+      mutate(name = factor(name, levels = unique(name))) %>% 
       ggplot(aes(value)) +
       geom_density(fill = 'skyblue') +
       facet_wrap(vars(name),

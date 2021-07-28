@@ -54,7 +54,8 @@ ui <- fluidPage(
       fluidRow(column(5,
                       h4(
                         'Author:',
-                        a(href = "https://womeimingzi11.github.io", 'Han Chen, Wanyanhan Jiang')
+                        a(href = "https://blog.washman.top", 'Han Chen'),
+                        ', Wanyanhan Jiang'
                       )),
                column(3,
                       h5(
@@ -94,18 +95,12 @@ ui <- fluidPage(
                  selectInput(
                    'p_adjust_method',
                    'Adjustment method for p-value for multiple comparisons.',
-                   choices = c(
-                     "holm",
-                     "hochberg",
-                     "hommel",
-                     "bonferroni",
-                     "BH",
-                     "BY",
-                     "fdr",
-                     "none"
+                   choices = p.adjust.methods,
+                   selected = ifelse(
+                     length(grep("bonferroni",p.adjust.methods)) == 0, 
+                     p.adjust.methods[[1]],
+                     "bonferroni")
                    ),
-                   selected = 'bonferroni'
-                 ),
                  p(
                    "The details of adjustment method fo p-value for multiple comparisons",
                    a(href = 'https://www.rdocumentation.org/packages/stats/versions/3.6.2/topics/p.adjust',
@@ -122,6 +117,15 @@ ui <- fluidPage(
                  tabPanel(
                    'Data Analysis',
                    h3('Data Distribution'),
+                   # Set the significant level of Shapiro-Wilk test of normality
+                   fluidRow(column(
+                     6,
+                     textInput(
+                         'sw_signif_level',
+                         'Significant level of Shapiro-Wilk test',
+                         value = "0.1"
+                       )
+                   )),
                    DTOutput('dist_detect'),
                    h3('Comparison Method'),
                    DTOutput('analysis_method'),
@@ -157,34 +161,10 @@ ui <- fluidPage(
                    h3('Post-Hoc Test'),
                    fluidRow(
                      column(3,
-                            # radioButtons(
-                            #     'x_lab_source',
-                            #     label = 'Type label or Auto detect',
-                            #     choices = c("Text" = 'text', 
-                            #                 "Follow input data" = 'auto'),
-                            #     selected = 'text'
-                            # ),
-                            # conditionalPanel(
-                            # condition = "input.x_lab_source == 'text'",
                             textInput('plot_x_lab',
                                       "Label of X axis",
                                       'Treatment')
-                            # )
                      ),
-                     # column(3,
-                     #        radioButtons(
-                     #            'y_lab_source',
-                     #            label = 'Type label or Auto detect',
-                     #            choices = c("Text" = 'text', 
-                     #                        "Follow input data" = 'auto'),
-                     #            selected = 'auto'
-                     #        ),
-                     #        conditionalPanel(
-                     #            condition = "input.y_lab_source == 'text'",
-                     #            textInput('plot_y_lab',
-                     #                      "Label of Y axis",
-                     #                      'value')
-                     #        )),
                      column(
                        3,
                        selectInput(
