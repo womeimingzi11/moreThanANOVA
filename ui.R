@@ -24,9 +24,20 @@ library(stringr)
 library(ggplot2)
 library(broom)
 library(cowplot)
+
+# Package for tests
+
+### Levene’s test
+library(car)
+
+### Permutation test
 library(coin)
+
+### Multiple Compare
 library(rcompanion)
 library(multcompView)
+
+### Plot Multiple Compare
 library(ggstatsplot)
 
 # Fix font of CJK
@@ -76,8 +87,9 @@ ui <- fluidPage(
                    'data_source',
                    'Upload files or try the demo',
                    choices = c('Upload files' = 'file',
-                               'Try the demo' = 'demo'),
-                   selected = 'demo'
+                               'Iris Data (Demo1)' = 'demo-iris',
+                               'ToothGrowth (Demo2)' = 'demo-tooth'),
+                   selected = 'demo-tooth'
                  ),
                  conditionalPanel(
                    condition = "input.data_source == 'file'",
@@ -95,10 +107,10 @@ ui <- fluidPage(
                    "try_paired",
                    "Whether you want a paired t-test/Wilcoxon Signed-Rank test?",
                    choices = c(
-                     'No',
-                     'Paired' = 'paired'
+                     '2-Sample/Unpaired',
+                     '1-Sample/Paired' = 'paired'
                    ),
-                   selected = 'No'
+                   selected = '2-Sample/Unpaired'
                  ),
                  helpText("Applicable for cases which each group has same number of observation."),
                  h4('Significance test between groups'),

@@ -26,8 +26,13 @@ server <- function(input, output) {
   #    render: DT
   ########################################
   rct_df_data <- reactive({
-    if (input$data_source == 'demo') {
+    if (input$data_source == 'demo-iris') {
       df <- select(iris, Species, everything())
+      tr_name <- colnames(df)[1]
+      rename(df, 'Treatment' = tr_name) %>%
+        mutate(Treatment = as.factor(Treatment))
+    } else if (input$data_source == 'demo-tooth') {
+      df <- select(ToothGrowth, supp, everything())
       tr_name <- colnames(df)[1]
       rename(df, 'Treatment' = tr_name) %>%
         mutate(Treatment = as.factor(Treatment))
@@ -37,7 +42,7 @@ server <- function(input, output) {
       } else {
         df <- read_csv(input$df_upload_file$datapath)
         tr_name <- colnames(df)[1]
-        rename(df, 'Treatment' = tr_name) %>%
+        rename(df, 'Treatment' = all_of(tr_name)) %>%
           mutate(Treatment = as.factor(Treatment))
       }
     }
@@ -106,61 +111,58 @@ server <- function(input, output) {
   #    found in each
   #    variable, the parametric test is
   #    not suitable any more.
-  #    This reactive function is called
-  #    rct_analysis_method
+  #    This section is seperated into 
+  #    two reactive functions.
+  #    rct_condition prepare conditions
+  #    rct_analysis_method generate tibble
   #    return: tibble
   #    render: DT
   ########################################
+  rct_condition_ls <-
+    reactive({
+      # to determine the number of treatment
+      # and whether the sample numbers of each treatment
+      # is equal or not
+      sum_df <-
+        rct_df_data()$`Treatment` %>%
+        table() %>% 
+        as.data.frame() %>% 
+        set_names("Variable", "Freq")
+      
+      list(Treatment_num = length(sum_df$Variable),
+           is_equal = length(unique(sum_df$Freq)) == 1,
+           to_leven = length(sum_df$Variable) == 2)
+    })
   
   rct_analysis_method <- reactive({
     # to determine use the parametric or nonparametric tests
-    nt_or_pt =
-      rct_dist_detect() %>%
-      lapply(function(variable) {
-        if_else(any(str_detect(variable, 'non-normal')),
-                'Nonparametric tests',
-                'Parametric tests')
-      })
-    # to determine the number of treatment
-    # and whether the sample numbers of each treatment
-    # is equal or not
-    sum_df <-
-      rct_df_data() %>%
-      pivot_longer(-Treatment) %>%
-      group_by(name) %>%
-      count(Treatment) %>%
-      nest(-name) %>%
-      # set the level of name as the order of nt_or_pt
-      # to make sure that all tests are matched
-      mutate(name = factor(name, levels = names(nt_or_pt))) %>%
-      arrange(name)
-    
-    condition_ls <-
-      lapply(sum_df$data, function(ind_sum_df) {
-        tibble(
-          Treatment_num = length(ind_sum_df$Treatment),
-          is_equal = length(unique(ind_sum_df$n)) == 1
-        )
-      })
+    # nt_or_pt =
+    #   rct_dist_detect() %>%
+    #   lapply(function(variable) {
+    #     if_else(any(str_detect(variable, 'non-normal')),
+    #             'Nonparametric tests',
+    #             'Parametric tests')
+    #   })
     
     # determine the detailed test method
-    map2(nt_or_pt, condition_ls, function(x, y) {
+    map(rct_dist_detect(), function(x) {
       if(input$is_perm == 'perm') {
         "Permutation test"
       } else {
-        if (x == 'Parametric tests') {
-          if (y$Treatment_num == 2) {
-            if(y$is_equal & input$try_paired == "paired"){
-              't-test'
-            } else {
+        if (x == 'normal') {
+          if (rct_condition_ls()$Treatment_num == 2) {
+            # Only the number of each group is equal can apply paired test
+            if(rct_condition_ls()$is_equal && input$try_paired == "paired"){
               'Paired t-test'
+            } else {
+              't-test'
             }
           } else {
             'ANOVA'
           }
         } else {
-          if (y$Treatment_num == 2) {
-            if (y$is_equal & input$try_paired == "paired") {
+          if (rct_condition_ls()$Treatment_num == 2) {
+            if (rct_condition_ls()$is_equal && input$try_paired == "paired") {
               'Wilcoxon Signed-rank test'
             } else {
               'Wilcoxon Rank Sum test'
@@ -173,6 +175,31 @@ server <- function(input, output) {
     }) %>%
       as.data.frame() %>%
       as_tibble()
+  })
+  
+  ########################################
+  # 2.5. apply Levene’s test to check
+  #    variance homogeneity
+  #    This reactive function is called
+  #    rct_leven_p
+  #    return: tibble
+  #    render: DT
+  #    colnames: Levene's Test (p.value)
+  ########################################
+  
+  rct_leven_p <- reactive({
+    if (rct_condition_ls()$to_leven) {
+      # rct_df_data[, -1] %>%
+      rct_df_data()[, -1] %>%
+        map_dfc(function(value_by_col) {
+          # leveneTest(value_by_col, group = rct_df_data[, 1]) %>%
+          leveneTest(value_by_col, group = rct_df_data()[, 1]) %>%
+            tidy() %>%
+            select(p.value)
+        }) %>%
+        # set_names(names(rct_analysis_method))
+        set_names(names(rct_analysis_method()))
+    }
   })
   
   ########################################
@@ -198,16 +225,37 @@ server <- function(input, output) {
                    everything(),
                    names_to = "Varible",
                    values_to = "Distribution")
+    
     tb_analysis_method <-
       pivot_longer(rct_analysis_method(),
                    everything(),
                    names_to = "Varible",
                    values_to = "Method")
     
-    list(tb_sw_test_pv_long,
-         tb_dist_detect_long, 
-         tb_analysis_method) %>%
-      reduce(left_join, by = "Varible")
+    if(rct_condition_ls()$to_leven) {
+      tb_leven_p <-
+        pivot_longer(rct_leven_p(),
+                     everything(),
+                     names_to = "Varible",
+                     values_to = 'Leven test (p.value)') %>% 
+        mutate(`Leven test (p.value)` = as.numeric(`Leven test (p.value)`))
+      
+      list(tb_sw_test_pv_long,
+           tb_dist_detect_long,
+           tb_analysis_method,
+           tb_leven_p) %>%
+               reduce(left_join, by = "Varible") %>%
+        mutate(Method = if_else(Method == "t-test",
+                                if_else(`Leven test (p.value)` < .05, 
+                                        "t-test (similar variances)",
+                                        "t-test (unequal variance)"),
+                                Method))
+    } else {
+      list(tb_sw_test_pv_long,
+           tb_dist_detect_long, 
+           tb_analysis_method) %>%
+        reduce(left_join, by = "Varible")
+    }
   })
   
   ########################################
@@ -234,7 +282,7 @@ server <- function(input, output) {
   })
   
   ########################################
-  # 5. we plot the qqplot of each
+  # 6. we plot the qqplot of each
   #    variable.
   #    This reactive function is called
   #    rct_ggplot_qq
@@ -298,7 +346,7 @@ server <- function(input, output) {
   #    render: DT - with Buttons
   ########################################
   rct_compare_ls <- reactive({
-    map2(rct_analysis_method(), rct_df_data()[,-1], function(x, y) {
+    map2(rct_df_dist_n_method()$Method, rct_df_data()[,-1], function(x, y) {
       # To detect whether sig test is nonparm or parm test
       # if parm, permutation test can be detected
       switch(
@@ -308,17 +356,15 @@ server <- function(input, output) {
           broom::glance() %>%
           select('statistic',
                  'p.value',
-                 'df' = 'parameter',
-                 'method') %>%
-          mutate(df = as.character(df)),
+                 # 'df' = 'parameter',
+                 'method'),
         "Wilcoxon Rank Sum test" =
           wilcox.test(y ~ rct_df_data()[[1]], na.action = na.omit, paired = FALSE) %>%
           broom::glance() %>%
           select('statistic',
                  'p.value',
-                 'df' = 'parameter',
-                 'method') %>%
-          mutate(df = as.character(df)),
+                 # 'df' = 'parameter',
+                 'method'),
         "Kruskal–Wallis H test" = 
           # the fallback method is kruskal.test
           kruskal.test(y, rct_df_data()[[1]], na.action = na.omit) %>%
@@ -345,20 +391,24 @@ server <- function(input, output) {
           select('statistic', 'p.value', 'df') %>%
           bind_cols(method = 'ANOVA') %>%
           mutate(df = as.character(df)),
-        "t-test" =
-        # for param which is not met the standard of anova
-        # t-test will be performed
-        t.test(y ~ rct_df_data()[[1]], na.action = na.omit, paired = FALSE) %>% 
+        "t-test (unequal variance)" =
+          # for param which is not met the standard of anova
+          # t-test will be performed
+          t.test(y ~ rct_df_data()[[1]], na.action = na.omit, paired = FALSE, var.equal = FALSE) %>% 
           broom::glance() %>%
-          select('statistic', 'p.value', df = parameter, 'method') %>% 
-          mutate(df = as.character(df)),
+          select('statistic', 'p.value', 'method'),
+        "t-test (similar variances)" =
+          # for param which is not met the standard of anova
+          # t-test will be performed
+          t.test(y ~ rct_df_data()[[1]], na.action = na.omit, paired = FALSE, var.equal = TRUE) %>% 
+          broom::glance() %>%
+          select('statistic', 'p.value', 'method'),
         "Paired t-test" =
           # for param which is not met the standard of anova
           # t-test will be performed
           t.test(y ~ rct_df_data()[[1]], na.action = na.omit, paired = TRUE) %>% 
           broom::glance() %>%
-          select('statistic', 'p.value', df = parameter, 'method') %>% 
-          mutate(df = as.character(df))
+          select('statistic', 'p.value', 'method')
       )
     }) %>%
       bind_rows() %>%
