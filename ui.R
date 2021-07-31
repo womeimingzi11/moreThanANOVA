@@ -149,10 +149,6 @@ ui <- fluidPage(
                    h3("Distribution and Method detection"),
                    DTOutput("df_dist_n_method"),
                    helpText("Once a p value < 0.0001, it will display as 0.0000."),
-                   h3("Select statistic methods manually"),
-                   fluidRow(column(width=12,uiOutput("method_determine_select"))),
-                   helpText("Select statistic methods automatically is not always suitable for every case.
-                            Histgram and Q-Q plot were also helpful for method selection."),
                    h3('Density Plot'),
                    plotOutput("ggplot_hist"),
                    h3('Q-Q Plot'),
@@ -169,6 +165,13 @@ ui <- fluidPage(
                  ),
                  tabPanel(
                    'Comparisons',
+                   h3("Select statistic methods"),
+                   fluidRow(column(width=12,uiOutput("method_determine_select"))),
+                   # helpText("Select statistic methods automatically is not always suitable for every case.
+                   #          Histgram and Q-Q plot were also helpful for method selection."),                   fluidRow(column(width=12,uiOutput("method_determine_select"))),
+                   # h3("Select statistic methods manually"),
+                   helpText("Select statistic methods automatically is not always suitable for every case.
+                            Histgram and Q-Q plot were also helpful for method selection."),
                    h3('Significance test between groups'),
                    downloadButton('dl_compare_ls',
                                   'Download'),
