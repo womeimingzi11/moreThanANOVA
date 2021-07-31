@@ -135,15 +135,6 @@ server <- function(input, output) {
     })
   
   rct_analysis_method <- reactive({
-    # to determine use the parametric or nonparametric tests
-    # nt_or_pt =
-    #   rct_dist_detect() %>%
-    #   lapply(function(variable) {
-    #     if_else(any(str_detect(variable, 'non-normal')),
-    #             'Nonparametric tests',
-    #             'Parametric tests')
-    #   })
-    
     # determine the detailed test method
     map(rct_dist_detect(), function(x) {
       if(input$is_perm == 'perm') {
@@ -306,6 +297,46 @@ server <- function(input, output) {
   })
   
   ########################################
+  # 7. Provide options to determine
+  #    what kind of statics 
+  #    would you like manually
+  #    This reactive function is called
+  #    rct_var_select_method_determine
+  #    return: uiOutput
+  ########################################
+  rct_select_method_determine <- reactive({
+      map2(rct_df_dist_n_method()$Varible, rct_df_dist_n_method()$Method, function(var, method) {
+        alternative_method <-
+          if(method %in% c("Wilcoxon Signed-rank test",
+                           "t-test (unequal variance)",
+                           "t-test (similar variances)")) {
+            c(
+              "Wilcoxon Rank Sum test",
+              "t-test (unequal variance)",
+              "t-test (similar variances)"
+            )
+          } else if (method %in% c("Kruskal–Wallis H test",
+                                   "ANOVA")) {
+            c("Kruskal–Wallis H test",
+              "ANOVA")
+          } else if (method %in% c("Wilcoxon Rank Sum test",
+                                   "Paired t-test")) {
+            c("Wilcoxon Rank Sum test",
+              "Paired t-test")
+          } else {
+            "Permutation test"
+          }
+        
+        column(width=4,
+               selectInput(paste("var_", var),
+                    label = paste("Method for", var),
+                    choices = alternative_method,
+                    selected = method)
+               )
+      })
+  })
+  
+  ########################################
   # Render
   #    panel: main - Distribution Determine
   ###    rct_dist_detect - DT
@@ -314,16 +345,11 @@ server <- function(input, output) {
   #    rct_ggplot_hist - plot
   #    rct_ggplot_qq - plot
   ########################################
-  
-  # output$dist_detect <-
-  #   renderDT({
-  #     rct_dist_detect()
-  #   })
-  # 
-  # output$analysis_method <-
-  #   renderDT(rct_analysis_method())
   output$df_dist_n_method <-
     renderDT(rct_df_dist_n_method())
+  
+  output$method_determine_select <-
+    renderUI(rct_select_method_determine())
   
   output$ggplot_hist <-
     renderPlot(rct_ggplot_hist())
@@ -346,9 +372,17 @@ server <- function(input, output) {
   #    render: DT - with Buttons
   ########################################
   rct_compare_ls <- reactive({
-    map2(rct_df_dist_n_method()$Method, rct_df_data()[,-1], function(x, y) {
-      # To detect whether sig test is nonparm or parm test
-      # if parm, permutation test can be detected
+    map2(rct_df_dist_n_method()$Varible, rct_df_data()[,-1], function(x, y) {
+      # get input from dynamic uiOutput
+      # I need to use a new trick to access the values the input values. 
+      # So far we’ve always accessed the components of input with $, e.g. input$col1. 
+      # But here we have the input names in a character vector,
+      # like var <- "col1". $ no longer works in this scenario,
+      # so we need to swich to [[, i.e. input[[var]].
+
+      x <-
+        input[[paste("var_", x)]]
+      
       switch(
         x,
         "Wilcoxon Signed-rank test" =  
@@ -356,14 +390,12 @@ server <- function(input, output) {
           broom::glance() %>%
           select('statistic',
                  'p.value',
-                 # 'df' = 'parameter',
                  'method'),
         "Wilcoxon Rank Sum test" =
           wilcox.test(y ~ rct_df_data()[[1]], na.action = na.omit, paired = FALSE) %>%
           broom::glance() %>%
           select('statistic',
                  'p.value',
-                 # 'df' = 'parameter',
                  'method'),
         "Kruskal–Wallis H test" = 
           # the fallback method is kruskal.test
@@ -521,8 +553,19 @@ server <- function(input, output) {
             bind_cols(name = x, y)
           }))
         
+        method_by_select <-
+        rct_df_dist_n_method()$Varible %>% 
+          map(~input[[paste("var_", .x)]])
+          
+        # get input from dynamic uiOutput
+        # I need to use a new trick to access the values the input values. 
+        # So far we’ve always accessed the components of input with $, e.g. input$col1. 
+        # But here we have the input names in a character vector,
+        # like var <- "col1". $ no longer works in this scenario,
+        # so we need to swich to [[, i.e. input[[var]].
+        
         list(
-          rct_analysis_method(),
+          method_by_select,
           post_hoc_data$data,
           post_hoc_data$name
         ) %>% 
@@ -539,6 +582,10 @@ server <- function(input, output) {
                     'Kruskal–Wallis H test')
               ) {
                 analysis_method = 'nonparametric'
+              } else if (x == "t-test (similar variances)"){
+                # t-test (similar variances) should be considered
+                # a special name
+                analysis_method = 'parametric_variance_equal'
               } else {
                 # In ggstatsplot, parametric test will performed by
                 # games howell post-hoc test
@@ -552,11 +599,12 @@ server <- function(input, output) {
                 x = Treatment,
                 y = value,
                 # grouping.var = name,
-                type = analysis_method,
+                type = if_else(analysis_method == "parametric_variance_equal", "parametric", analysis_method),
                 nboot = 10,
                 plot.type = 'box',
                 pairwise.comparisons = TRUE,
                 results.subtitle = input$show_statis == "show",
+                var.equal = analysis_method == "parametric_variance_equal",
                 ggstatsplot.layer = FALSE,
                 mean.plotting	= FALSE,
                 sample.size.label = FALSE,

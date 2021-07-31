@@ -145,15 +145,12 @@ ui <- fluidPage(
                  tabPanel('Data Viewer',
                           DTOutput("df_com")),
                  tabPanel(
-                   'Data Analysis',
-                   # h3('Data Distribution'),
-                   # Set the significant level of Shapiro-Wilk test of normality
-                   # DTOutput('dist_detect'),
-                   # h3('Comparison Method'),
-                   # DTOutput('analysis_method'),
+                   'Exploratory Data Analysis',
                    h3("Distribution and Method detection"),
                    DTOutput("df_dist_n_method"),
                    helpText("Once a p value < 0.0001, it will display as 0.0000."),
+                   h3("Select statistic methods manually"),
+                   fluidRow(column(width=12,uiOutput("method_determine_select"))),
                    h3('Density Plot'),
                    plotOutput("ggplot_hist"),
                    h3('Q-Q Plot'),
