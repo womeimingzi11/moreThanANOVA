@@ -212,7 +212,20 @@ ui <- fluidPage(
                        ),
                      )
                    ),
-                   fluidRow(column(
+                   fluidRow(
+                     column(
+                       3,
+                       selectInput(
+                         'show_statis',
+                         'Do you need the statisiics tests?',
+                         choices = c(
+                           'Show' = 'show',
+                           'Hide' = 'hide'
+                         ),
+                         selected = 'Show'
+                       )
+                     ),
+                     column(
                      3,
                      selectInput(
                        'pairwise_display',
@@ -274,7 +287,7 @@ ui <- fluidPage(
                      strong('Download Figure'),
                      'to download it directly.'
                    ),
-                   p(
+                   helpText(
                      'P.S. showing figure on this page and downloading figure implement in different code, even the figure in browser lookes massy or wired, the downloaded figure still can meet the standar of publication level with appropriate parameter sets.'
                    ),
                    actionButton(

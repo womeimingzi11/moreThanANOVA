@@ -556,7 +556,7 @@ server <- function(input, output) {
                 nboot = 10,
                 plot.type = 'box',
                 pairwise.comparisons = TRUE,
-                results.subtitle = FALSE,
+                results.subtitle = input$show_statis == "show",
                 ggstatsplot.layer = FALSE,
                 mean.plotting	= FALSE,
                 sample.size.label = FALSE,
