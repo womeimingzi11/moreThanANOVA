@@ -151,18 +151,20 @@ ui <- fluidPage(
                    helpText("Once a p value < 0.0001, it will display as 0.0000."),
                    h3("Select statistic methods manually"),
                    fluidRow(column(width=12,uiOutput("method_determine_select"))),
+                   helpText("Select statistic methods automatically is not always suitable for every case.
+                            Histgram and Q-Q plot were also helpful for method selection."),
                    h3('Density Plot'),
                    plotOutput("ggplot_hist"),
                    h3('Q-Q Plot'),
-                   helpText("quantile-quantie plot, aka. Q-Q plot, ",
-                            "is a somewhat subjective visual check. ",
-                            "However, it is still a useful tool. ",
-                            "In some cases, if the sample size is sufficiently large, ",
-                            "Shapiro-Wilk Normality test may detect, ",
-                            "even trivial departures from the null hypothesis, ",
-                            " (i.e., although there may be some statistically significant effect, ",
-                            "it may be too small to be of any practical significance); ",
-                            "additional investigation by Q-Q plot is typically advisable."),
+                   helpText("quantile-quantie plot, aka. Q-Q plot,
+                            is a somewhat subjective visual check.
+                            However, it is still a useful tool.
+                            In some cases, if the sample size is sufficiently large,
+                            Shapiro-Wilk Normality test may detect,
+                            even trivial departures from the null hypothesis,
+                             (i.e., although there may be some statistically significant effect,
+                            it may be too small to be of any practical significance);
+                            additional investigation by Q-Q plot is typically advisable."),
                    plotOutput("ggplot_qq")
                  ),
                  tabPanel(
