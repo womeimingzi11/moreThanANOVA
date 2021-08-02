@@ -167,9 +167,6 @@ ui <- fluidPage(
                    'Comparisons',
                    h3("Select statistic methods"),
                    fluidRow(column(width=12,uiOutput("method_determine_select"))),
-                   # helpText("Select statistic methods automatically is not always suitable for every case.
-                   #          Histgram and Q-Q plot were also helpful for method selection."),                   fluidRow(column(width=12,uiOutput("method_determine_select"))),
-                   # h3("Select statistic methods manually"),
                    helpText("Select statistic methods automatically is not always suitable for every case.
                             Histgram and Q-Q plot were also helpful for method selection."),
                    h3('Significance test between groups'),

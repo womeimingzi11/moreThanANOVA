@@ -440,7 +440,8 @@ server <- function(input, output) {
           # t-test will be performed
           t.test(y ~ rct_df_data()[[1]], na.action = na.omit, paired = TRUE) %>% 
           broom::glance() %>%
-          select('statistic', 'p.value', 'method')
+          select('statistic', 'p.value', 'method'),
+        stop("Find an issue in `rct_compare_ls` section, please note chenhan28@gmail.com")
       )
     }) %>%
       bind_rows() %>%
