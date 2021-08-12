@@ -617,7 +617,8 @@ server <- function(input, output) {
                 xlab = input$plot_x_lab,
                 ylab = z,
                 pairwise.display = input$pairwise_display,
-                pairwise.annotation = input$pairwise_annotation,
+                # Outdate and unavaible, Remove
+                # pairwise.annotation = input$pairwise_annotation,
                 p.adjust.method = input$p_adjust_method,
                 # ggplot theme
                 ggplot.component = theme(text = element_text(family = 'wqy-microhei'))
@@ -657,7 +658,7 @@ server <- function(input, output) {
       filename = "compare_table.csv",
       content = function(file) {
         write_csv(x = rct_compare_table(),
-                  path = file)
+                  file = file)
       }
     )
   

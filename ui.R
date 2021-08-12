@@ -237,16 +237,18 @@ ui <- fluidPage(
                        selected = 'significant'
                      )
                    ),
-                   column(
-                     3,
-                     selectInput(
-                       'pairwise_annotation',
-                       'Annotations to use for pairwise comparisons',
-                       choices = c("p.value",
-                                   "asterisk"),
-                       selected = 'asterisk'
-                     )
-                   )),
+                   # Outdate and unavaible, Remove
+                   # column(
+                   #   3,
+                   #   selectInput(
+                   #     'pairwise_annotation',
+                   #     'Annotations to use for pairwise comparisons',
+                   #     choices = c("p.value",
+                   #                 "asterisk"),
+                   #     selected = 'asterisk'
+                   #   )
+                   # )
+                   ),
                    fluidRow(
                      column(
                        3,
