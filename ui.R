@@ -14,6 +14,7 @@ library(shiny)
 library(shinythemes)
 library(DT)
 library(shinydisconnect)
+library(shiny.i18n)
 
 # Package for data manipulation
 library(tidyr)
@@ -43,6 +44,10 @@ library(ggstatsplot)
 # Fix font of CJK
 library(showtext)
 
+# File with translations
+i18n <- Translator$new(translation_csvs_path = "resource/i18n/")
+i18n$set_translation_language("zn_CN") # here you select the default translation to display
+
 # Define UI for application that draws a histogram
 ui <- fluidPage(
   disconnectMessage2(),
@@ -61,10 +66,10 @@ ui <- fluidPage(
     "moreThanANOVA",
     # id = "main_navbar",
     tabPanel(
-      'Overview',
+      i18n$t('Overview'),
       fluidRow(column(5,
                       h4(
-                        'Author:',
+                        i18n$t('Author:'),
                         a(href = "https://blog.washman.top", 'Han Chen'),
                         ', Wanyanhan Jiang'
                       )),
@@ -78,14 +83,14 @@ ui <- fluidPage(
                       ))),
       includeMarkdown('resource/page/overview.md')
     ),
-    tabPanel('Analysis',
+    tabPanel(i18n$t('Analysis'),
              sidebarLayout(
                sidebarPanel(
                  img(src = "table_str.png", width = "100%"),
-                 h4('Data Source'),
+                 h4(i18n$t('Data Source')),
                  radioButtons(
                    'data_source',
-                   'Upload files or try the demo',
+                   i18n$t('Upload files or try the demo'),
                    choices = c('Upload files' = 'file',
                                'Iris Data (Demo1)' = 'demo-iris',
                                'ToothGrowth (Demo2)' = 'demo-tooth'),
@@ -94,37 +99,37 @@ ui <- fluidPage(
                  conditionalPanel(
                    condition = "input.data_source == 'file'",
                    fileInput('df_upload_file',
-                             'Please upload your data')
+                             i18n$t('Please upload your data'))
                  ),
-                 h4('Significant level of Shapiro-Wilk test'),
+                 h4(i18n$t('Significant level of Shapiro-Wilk test')),
                  textInput(
                    'sw_signif_level',
-                   'Set thresheld of Shapiro-Wilk test',
+                   i18n$t('Set thresheld of Shapiro-Wilk test'),
                    value = "0.05"
                    ),
-                 h4('One and two sample tests'),
+                 h4(i18n$t('One and two sample tests')),
                  selectInput(
-                   "try_paired",
-                   "Whether you want a paired t-test/Wilcoxon Signed-Rank test?",
+                   inputId = "try_paired",
+                   label = i18n$t("Whether you want a paired t-test/Wilcoxon Signed-Rank test?"),
                    choices = c(
                      '2-Sample/Unpaired',
                      '1-Sample/Paired' = 'paired'
                    ),
                    selected = '2-Sample/Unpaired'
                  ),
-                 helpText("Applicable for cases which each group has same number of observation."),
-                 h4('Significance test between groups'),
+                 helpText(i18n$t("Applicable for cases which each group has same number of observation.")),
+                 h4(i18n$t('Significance test between groups')),
                  selectInput(
-                   'is_perm',
-                   'Whether you want a permutation test?',
+                   inputId = 'is_perm',
+                   label = i18n$t('Whether you want a permutation test?'),
                    choices = c('No', 
                                'Monte Carlo Permutation Tests' = 'perm'),
                    selected = 'No'
                  ),
-                 h4('Post-Hoc Test'),
+                 h4(i18n$t('Post-Hoc Test')),
                  selectInput(
-                   'p_adjust_method',
-                   'Adjustment method for p-value for multiple comparisons.',
+                   inputId = 'p_adjust_method',
+                   label = i18n$t('Adjustment method for p-value for multiple comparisons.'),
                    choices = p.adjust.methods,
                    selected = ifelse(
                      length(grep("bonferroni",p.adjust.methods)) == 0, 
@@ -132,23 +137,25 @@ ui <- fluidPage(
                      "bonferroni")
                    ),
                  helpText(
-                   "The details of adjustment method fo p-value for multiple comparisons",
+                   i18n$t("The details of adjustment method fo p-value for multiple comparisons"),
                    a(href = 'https://www.rdocumentation.org/packages/stats/versions/3.6.2/topics/p.adjust',
-                     'can be found here.'),
-                   'You can also found them from the vignette of',
+                     i18n$t('can be found here.')),
+                   i18n$t('You can also found them from the vignette of'),
                    code('stat::p.adjust')
                  )
                ),
                
                # Show a plot of the generated distribution
                mainPanel(tabsetPanel(
-                 tabPanel('Data Viewer',
+                 tabPanel(
+                   title = 
+                     i18n$t('Data Viewer'),
                           DTOutput("df_com")),
                  tabPanel(
-                   'Exploratory Data Analysis',
-                   h3("Distribution and Method detection"),
+                   i18n$t('Exploratory Data Analysis'),
+                   h3(i18n$t("Distribution and Method detection")),
                    DTOutput("df_dist_n_method"),
-                   helpText("Once a p value < 0.0001, it will display as 0.0000."),
+                   helpText(i18n$t("It will display as 0.0000 when a p < 0.0001.")),
                    h3('Density Plot'),
                    plotOutput("ggplot_hist"),
                    h3('Q-Q Plot'),
@@ -164,14 +171,14 @@ ui <- fluidPage(
                    plotOutput("ggplot_qq")
                  ),
                  tabPanel(
-                   'Comparisons',
-                   h3("Select statistic methods"),
+                   i18n$t('Comparisons'),
+                   h3(i18n$t("Select statistic methods")),
                    fluidRow(column(width=12,uiOutput("method_determine_select"))),
                    helpText("Select statistic methods automatically is not always suitable for every case.
                             Histgram and Q-Q plot were also helpful for method selection."),
-                   h3('Significance test between groups'),
+                   h3(i18n$t('Significance test between groups')),
                    downloadButton('dl_compare_ls',
-                                  'Download'),
+                                  i18n$t('Download')),
                    DTOutput('compare_ls'),
                    ########################################
                    # Why don't use the DT tool button?
@@ -189,22 +196,23 @@ ui <- fluidPage(
                    # So, we seperate the DT and Download
                    # to make things work well.
                    ########################################
-                   h3('Data Summary'),
+                   h3(i18n$t('Data Summary')),
                    downloadButton('dl_compare_table',
-                                  'Download'),
+                                  i18n$t('Download')),
                    DTOutput('compare_table'),
-                   h3('Post-Hoc Test'),
+                   h3(i18n$t('Post-Hoc Test')),
                    fluidRow(
                      column(3,
-                            textInput('plot_x_lab',
-                                      "Label of X axis",
-                                      'Treatment')
+                            textInput(
+                              inputId = 'plot_x_lab',
+                              label = i18n$t("Label of X axis"),
+                              placeholder = 'Treatment')
                      ),
                      column(
                        3,
                        selectInput(
-                         'cow_lab',
-                         "label of each plot",
+                        inputId = 'cow_lab',
+                         label = i18n$t("Label of each plot"),
                          choices = c('UPPER CASE' = "AUTO",
                                      'lower case' = "auto"),
                          selected = 'auto'
@@ -215,8 +223,8 @@ ui <- fluidPage(
                      column(
                        3,
                        selectInput(
-                         'show_statis',
-                         'Do you need the statisiics tests?',
+                         inputId = 'show_statis',
+                         label = i18n$t('Do you need the statisiics tests?'),
                          choices = c(
                            'Show' = 'show',
                            'Hide' = 'hide'
@@ -227,8 +235,8 @@ ui <- fluidPage(
                      column(
                      3,
                      selectInput(
-                       'pairwise_display',
-                       'Which pairwise comparisons to display?',
+                       inputId = 'pairwise_display',
+                       label = i18n$t('Which pairwise comparisons to display?'),
                        choices = c(
                          'Significant' = 'significant',
                          'All' = 'all',
@@ -253,8 +261,8 @@ ui <- fluidPage(
                      column(
                        3,
                        numericInput(
-                         'figure_ncol',
-                         'Figure numbers per row (up to 10)',
+                         inputId = 'figure_ncol',
+                         label = i18n$t('Figure numbers per row (up to 10)'),
                          min = 1,
                          max = 10,
                          value = 3
@@ -263,8 +271,8 @@ ui <- fluidPage(
                      column(
                        3,
                        numericInput(
-                         'figure_width',
-                         'Downloaded figure width (inch)',
+                         inputId = 'figure_width',
+                         label = i18n$t('Downloaded figure width (inch)'),
                          min = 3,
                          max = 20,
                          value = 12
@@ -273,8 +281,8 @@ ui <- fluidPage(
                      column(
                        3,
                        numericInput(
-                         'figure_height',
-                         'Downloaded figure height (inch)',
+                         inputId = 'figure_height',
+                         label = i18n$t('Downloaded figure height (inch)'),
                          min = 3,
                          max = 20,
                          value = 10
@@ -303,7 +311,7 @@ ui <- fluidPage(
                
              )),
     tabPanel(
-      'Acknowledgements & References',
+      i18n$t('Acknowledgements & References'),
       includeMarkdown('resource/page/acknowledgements.md')
     )
   )

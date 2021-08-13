@@ -1,0 +1,35 @@
+﻿en,zn_CN
+Overview,总览
+Author:,作者：
+Analysis,分析
+Data Source,数据源
+Upload files or try the demo,上传数据/示例数据
+Please upload your data,上传数据
+Significant level of Shapiro-Wilk test,Shapiro-Wilk test 显著水平
+Set thresheld of Shapiro-Wilk test,设置 Shapiro-Wilk test 显著水平
+One and two sample tests,单/双样本检验
+Whether you want a paired t-test/Wilcoxon Signed-Rank test?,是否进行 Paired t-test/Wilcoxon Signed-Rank test?
+Applicable for cases which each group has same number of observation.,仅适用于各组记录数量相同的数据
+Significance test between groups,显著性检验
+Whether you want a permutation test?,是否进行置换检验？
+Post-Hoc Test,事后检验
+Adjustment method for p-value for multiple comparisons.,调整 p 值计算方法。
+The details of adjustment method fo p-value for multiple comparisons,调整 p 值计算方法详情
+can be found here.,参见该链接。
+You can also found them from the vignette of,也可以阅读帮助文档
+Data Viewer,数据预览
+Exploratory Data Analysis,数据探索分析
+Distribution and Method detection,数据分布与检验方法
+It will display as 0.0000 when a p < 0.0001.,当 p<0.0001时，将显示为0.0000。
+Comparisons,显著性检验
+Select statistic methods,选择检验方法
+Download,下载
+Data Summary,数据摘要
+Do you need the statisiics tests?,是否显示总体检验结果
+Which pairwise comparisons to display?,如何显示组间检验结果
+Figure numbers per row (up to 10),单行图片数量（最多10张）
+Downloaded figure width (inch),下载图片宽度（英寸/inch）
+Downloaded figure height (inch),下载图片高度（英寸/inch）
+Label of X axis,X 轴标题
+Label of each plot,图标注
+Acknowledgements & References,致谢
