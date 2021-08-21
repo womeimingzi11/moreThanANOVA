@@ -307,7 +307,7 @@ server <- function(input, output) {
   rct_select_method_determine <- reactive({
       map2(rct_df_dist_n_method()$Varible, rct_df_dist_n_method()$Method, function(var, method) {
         alternative_method <-
-          if(method %in% c("Wilcoxon Signed-rank test",
+          if(method %in% c("Wilcoxon Rank Sum test",
                            "t-test (unequal variance)",
                            "t-test (equal variance)")) {
             c(
@@ -319,9 +319,9 @@ server <- function(input, output) {
                                    "ANOVA")) {
             c("Kruskal–Wallis H test",
               "ANOVA")
-          } else if (method %in% c("Wilcoxon Rank Sum test",
+          } else if (method %in% c("Wilcoxon Signed-rank test",
                                    "Paired t-test")) {
-            c("Wilcoxon Rank Sum test",
+            c("Wilcoxon Signed-rank test",
               "Paired t-test")
           } else {
             "Permutation test"

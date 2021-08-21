@@ -96,6 +96,16 @@ ui <- fluidPage(
                    fileInput('df_upload_file',
                              'Please upload your data')
                  ),
+                 helpText(
+                   a(href = "https://archive.ics.uci.edu/ml/datasets/iris", "Iris Data Set"),
+                   tags$br(),
+                   a(href = "https://academic.oup.com/jn/article-abstract/33/5/491/4726758?redirectedFrom=fulltext", "ToothGrowth Data Set")
+                 ),
+                 conditionalPanel(
+                   condition = "input.data_source == 'file'",
+                   fileInput('df_upload_file',
+                             'Please upload your data')
+                 ),
                  h4('Significant level of Shapiro-Wilk test'),
                  textInput(
                    'sw_signif_level',
