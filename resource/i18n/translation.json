@@ -1,0 +1,152 @@
+{
+  "translation": [
+    {
+      "en": "Overview",
+      "zh_CN": "总览"
+    },
+    {
+      "en": "Author:",
+      "zh_CN": "作者："
+    },
+    {
+      "en": "Han Chen",
+      "zh_CN": "陈晗"
+    },
+    {
+      "en": "and Wanyanhan Jiang",
+      "zh_CN": "和蒋宛彦含"
+    },
+    {
+      "en": "Analysis",
+      "zh_CN": "分析"
+    },
+    {
+      "en": "Data Source",
+      "zh_CN": "数据源"
+    },
+    {
+      "en": "Upload files or try the demo",
+      "zh_CN": "上传数据/示例数据"
+    },
+    {
+      "en": "Please upload your data",
+      "zh_CN": "上传数据"
+    },
+    {
+      "en": "Significant level of Shapiro-Wilk test",
+      "zh_CN": "Shapiro-Wilk test 显著水平"
+    },
+    {
+      "en": "Set thresheld of Shapiro-Wilk test",
+      "zh_CN": "设置 Shapiro-Wilk test 显著水平"
+    },
+    {
+      "en": "One and two sample tests",
+      "zh_CN": "单/双样本检验"
+    },
+    {
+      "en": "Whether you want a paired t-test/Wilcoxon Signed-Rank test?",
+      "zh_CN": "是否进行 Paired t-test/Wilcoxon Signed-Rank test?"
+    },
+    {
+      "en": "Applicable for cases which each group has same number of observation.",
+      "zh_CN": "仅适用于各组记录数量相同的数据"
+    },
+    {
+      "en": "Significance test between groups",
+      "zh_CN": "显著性检验"
+    },
+    {
+      "en": "Whether you want a permutation test?",
+      "zh_CN": "是否进行置换检验？"
+    },
+    {
+      "en": "Post-Hoc Test",
+      "zh_CN": "事后检验"
+    },
+    {
+      "en": "Adjustment method for p-value for multiple comparisons.",
+      "zh_CN": "调整 p 值计算方法。"
+    },
+    {
+      "en": "The details of adjustment method fo p-value for multiple comparisons",
+      "zh_CN": "调整 p 值计算方法详情"
+    },
+    {
+      "en": "can be found here.",
+      "zh_CN": "参见该链接。"
+    },
+    {
+      "en": "You can also found them from the vignette of",
+      "zh_CN": "也可以阅读帮助文档"
+    },
+    {
+      "en": "Data Viewer",
+      "zh_CN": "数据预览  "
+    },
+    {
+      "en": "Exploratory Data Analysis",
+      "zh_CN": "数据探索分析"
+    },
+    {
+      "en": "Distribution and Method detection",
+      "zh_CN": "数据分布与检验方法"
+    },
+    {
+      "en": "It will display as 0.0000 when a p < 0.0001.",
+      "zh_CN": "当 p<0.0001时，将显示为0.0000。"
+    },
+    {
+      "en": "Comparisons",
+      "zh_CN": "显著性检验"
+    },
+    {
+      "en": "Select statistic methods",
+      "zh_CN": "选择检验方法"
+    },
+    {
+      "en": "Download",
+      "zh_CN": "下载"
+    },
+    {
+      "en": "Data Summary",
+      "zh_CN": "数据摘要"
+    },
+    {
+      "en": "Label of X axis",
+      "zh_CN": "X 轴标题"
+    },
+    {
+      "en": "Label of each plot",
+      "zh_CN": "图标注"
+    },
+    {
+      "en": "Do you need the statisiics tests?",
+      "zh_CN": "是否显示总体检验结果"
+    },
+    {
+      "en": "Which pairwise comparisons to display?",
+      "zh_CN": "如何显示组间检验结果"
+    },
+    {
+      "en": "Figure numbers per row (up to 10)",
+      "zh_CN": "单行图片数量（最多10张）"
+    },
+    {
+      "en": "Downloaded figure width (inch)",
+      "zh_CN": "下载图片宽度（英寸/inch）"
+    },
+    {
+      "en": "Downloaded figure height (inch)",
+      "zh_CN": "下载图片高度（英寸/inch）"
+    },
+    {
+      "en": "Acknowledgements & References",
+      "zh_CN": "致谢"
+    }
+  ],
+  "languages": [
+    "en",
+    "zh_CN"
+  ]
+}

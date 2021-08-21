@@ -45,9 +45,8 @@ library(ggstatsplot)
 library(showtext)
 
 # File with translations
-i18n <- Translator$new(translation_csvs_path = "resource/i18n/")
-i18n$set_translation_language("zn_CN") # here you select the default translation to display
-
+i18n <- Translator$new(translation_json_path = "resource/i18n/translation.json")
+i18n$set_translation_language("zh_CN") # here you select the default translation to display
 # Define UI for application that draws a histogram
 ui <- fluidPage(
   disconnectMessage2(),
@@ -60,18 +59,16 @@ ui <- fluidPage(
   ))),
   # Application title
   theme = shinytheme('flatly'),
-  # moreThanANOVAtitlePanel("moreThanANOVA"),
   
   navbarPage(
     "moreThanANOVA",
-    # id = "main_navbar",
     tabPanel(
       i18n$t('Overview'),
       fluidRow(column(5,
                       h4(
                         i18n$t('Author:'),
-                        a(href = "https://blog.washman.top", 'Han Chen'),
-                        ', Wanyanhan Jiang'
+                        a(href = "https://blog.washman.top", i18n$t('Han Chen')),
+                        i18n$t('and Wanyanhan Jiang')
                       )),
                column(3,
                       h5(
@@ -80,7 +77,8 @@ ui <- fluidPage(
                column(3,
                       h6(
                         'Version: 20210726'
-                      ))),
+                      ))
+      ), 
       includeMarkdown('resource/page/overview.md')
     ),
     tabPanel(i18n$t('Analysis'),
@@ -297,7 +295,7 @@ ui <- fluidPage(
                      'to download it directly.'
                    ),
                    helpText(
-                     'P.S. showing figure on this page and downloading figure implement in different code, even the figure in browser lookes massy or wired, the downloaded figure still can meet the standar of publication level with appropriate parameter sets.'
+                     i18n$t('P.S. showing figure on this page and downloading figure implement in different code, even the figure in browser lookes massy or wired, the downloaded figure still can meet the standar of publication level with appropriate parameter sets.')
                    ),
                    actionButton(
                      'plot_figure',
