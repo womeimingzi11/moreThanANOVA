@@ -238,7 +238,7 @@ server <- function(input, output) {
                reduce(left_join, by = "Varible") %>%
         mutate(Method = if_else(Method == "t-test",
                                 if_else(`Leven test (p.value)` < .05, 
-                                        "t-test (similar variances)",
+                                        "t-test (equal variance)",
                                         "t-test (unequal variance)"),
                                 Method))
     } else {
@@ -309,11 +309,11 @@ server <- function(input, output) {
         alternative_method <-
           if(method %in% c("Wilcoxon Signed-rank test",
                            "t-test (unequal variance)",
-                           "t-test (similar variances)")) {
+                           "t-test (equal variance)")) {
             c(
               "Wilcoxon Rank Sum test",
               "t-test (unequal variance)",
-              "t-test (similar variances)"
+              "t-test (equal variance)"
             )
           } else if (method %in% c("Kruskal–Wallis H test",
                                    "ANOVA")) {
@@ -429,7 +429,7 @@ server <- function(input, output) {
           t.test(y ~ rct_df_data()[[1]], na.action = na.omit, paired = FALSE, var.equal = FALSE) %>% 
           broom::glance() %>%
           select('statistic', 'p.value', 'method'),
-        "t-test (similar variances)" =
+        "t-test (equal variance)" =
           # for param which is not met the standard of anova
           # t-test will be performed
           t.test(y ~ rct_df_data()[[1]], na.action = na.omit, paired = FALSE, var.equal = TRUE) %>% 
@@ -583,8 +583,8 @@ server <- function(input, output) {
                     'Kruskal–Wallis H test')
               ) {
                 analysis_method = 'nonparametric'
-              } else if (x == "t-test (similar variances)"){
-                # t-test (similar variances) should be considered
+              } else if (x == "t-test (equal variance)"){
+                # t-test (equal variance) should be considered
                 # a special name
                 analysis_method = 'parametric_variance_equal'
               } else {
