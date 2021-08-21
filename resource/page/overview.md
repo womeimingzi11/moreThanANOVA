@@ -18,15 +18,11 @@ For what I can tell, there is an **premise** of ANOVA, in fact it is a premise f
 
 However, we are not always lucky dogs, literally, it even never works for me in my current research.
 
-Gernerally, we choose nonparametric tests, the most famous nonparametric tests to compare data between two treatments are **Mann–Whitney U test**, while across triple or more treatments, **Kruskal-Wallis rank sum test** are often performed.
+We choose nonparametric tests, **Wilcoxon tests** for two treatments, and **Kruskal-Wallis rank sum test** for multiple treatments.
 
 Their are conceptions about signed-rank test and signed-rank sum test. We also don't state what are these conceptions, but I highly recommand you to Google them before you choose a test. Here is a article that posted by **Stats and R** entitled [Wilcoxon test in R: how to compare 2 groups under the non-normality assumption](https://www.statsandr.com/blog/wilcoxon-test-in-r-how-to-compare-2-groups-under-the-non-normality-assumption/).
 
 Besides, the permutation test is also used as a fancy method to evaluate the significant level especially for data with unknown distribution. For more information, there is an article from [R-Bloger](https://www.r-bloggers.com/what-is-a-permutation-test/), and here is [another Chinese article](https://www.r-bloggers.com/what-is-a-permutation-test/) about it.
-
-You are welcomed to commit any feature about this and even any other features in my [repo on GitHub](https://github.com/womeimingzi11/moreThanANOVA).
-
-You are also welcomed to visit my [Blog (in Chinese)](https://womeimingzi11.github.io) or contact me by [mail](mailto://chenhan28@gmail.com).
 
 ## Privacy Statements
 

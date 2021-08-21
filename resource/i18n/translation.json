@@ -1,152 +1,184 @@
 {
   "translation": [
     {
-      "en": "Overview",
-      "zh_CN": "总览"
+      "English": "Overview",
+      "简体中文": "总览"
     },
     {
-      "en": "Author:",
-      "zh_CN": "作者："
+      "English": "Author:",
+      "简体中文": "作者："
     },
     {
-      "en": "Han Chen",
-      "zh_CN": "陈晗"
+      "English": "Han Chen",
+      "简体中文": "陈晗"
     },
     {
-      "en": "and Wanyanhan Jiang",
-      "zh_CN": "和蒋宛彦含"
+      "English": "and Wanyanhan Jiang",
+      "简体中文": "和蒋宛彦含"
     },
     {
-      "en": "Analysis",
-      "zh_CN": "分析"
+      "English": "Analysis",
+      "简体中文": "分析"
     },
     {
-      "en": "Data Source",
-      "zh_CN": "数据源"
+      "English": "Switch language/切换语言",
+      "简体中文": "切换语言/Switch language"
     },
     {
-      "en": "Upload files or try the demo",
-      "zh_CN": "上传数据/示例数据"
+      "English": "Data Source",
+      "简体中文": "数据源"
     },
     {
-      "en": "Please upload your data",
-      "zh_CN": "上传数据"
+      "English": "Iris Data Set",
+      "简体中文": "Iris 数据集"
     },
     {
-      "en": "Significant level of Shapiro-Wilk test",
-      "zh_CN": "Shapiro-Wilk test 显著水平"
+      "English": "ToothGrowth Data Set",
+      "简体中文": "ToothGrowth 数据集"
     },
     {
-      "en": "Set thresheld of Shapiro-Wilk test",
-      "zh_CN": "设置 Shapiro-Wilk test 显著水平"
+      "English": "Upload files or try the demo",
+      "简体中文": "上传数据/示例数据"
     },
     {
-      "en": "One and two sample tests",
-      "zh_CN": "单/双样本检验"
+      "English": "Please upload your data",
+      "简体中文": "上传数据"
     },
     {
-      "en": "Whether you want a paired t-test/Wilcoxon Signed-Rank test?",
-      "zh_CN": "是否进行 Paired t-test/Wilcoxon Signed-Rank test?"
+      "English": "Significant level of Shapiro-Wilk test",
+      "简体中文": "Shapiro-Wilk test 显著水平"
     },
     {
-      "en": "Applicable for cases which each group has same number of observation.",
-      "zh_CN": "仅适用于各组记录数量相同的数据"
+      "English": "Set threshold of Shapiro-Wilk test",
+      "简体中文": "设置 Shapiro-Wilk test 显著水平"
     },
     {
-      "en": "Significance test between groups",
-      "zh_CN": "显著性检验"
+      "English": "One and two sample tests",
+      "简体中文": "单/双样本检验"
     },
     {
-      "en": "Whether you want a permutation test?",
-      "zh_CN": "是否进行置换检验？"
+      "English": "Whether you want a paired t-test/Wilcoxon Signed-Rank test?",
+      "简体中文": "是否进行 Paired t-test/Wilcoxon Signed-Rank test?"
     },
     {
-      "en": "Post-Hoc Test",
-      "zh_CN": "事后检验"
+      "English": "Applicable for cases which each group has same number of observation.",
+      "简体中文": "仅适用于各组记录数量相同的数据"
     },
     {
-      "en": "Adjustment method for p-value for multiple comparisons.",
-      "zh_CN": "调整 p 值计算方法。"
+      "English": "Select statistic methods automatically is not always suitable for every case. Histgram and Q-Q plot were also helpful for method selection.",
+      "简体中文": "系统推荐之统计方法也许并非总是最佳方法。您也可参考密度图与 Q-Q 图选择统计方法。"
     },
     {
-      "en": "The details of adjustment method fo p-value for multiple comparisons",
-      "zh_CN": "调整 p 值计算方法详情"
+      "English": "Significance test between groups",
+      "简体中文": "显著性检验"
     },
     {
-      "en": "can be found here.",
-      "zh_CN": "参见该链接。"
+      "English": "Whether you want a permutation test?",
+      "简体中文": "是否进行置换检验？"
     },
     {
-      "en": "You can also found them from the vignette of",
-      "zh_CN": "也可以阅读帮助文档"
+      "English": "Post-Hoc Test",
+      "简体中文": "事后检验"
     },
     {
-      "en": "Data Viewer",
-      "zh_CN": "数据预览  "
+      "English": "Adjustment method for p-value for multiple comparisons.",
+      "简体中文": "调整 p 值计算方法。"
     },
     {
-      "en": "Exploratory Data Analysis",
-      "zh_CN": "数据探索分析"
+      "English": "The details of adjustment method fo p-value for multiple comparisons",
+      "简体中文": "调整 p 值计算方法详情"
     },
     {
-      "en": "Distribution and Method detection",
-      "zh_CN": "数据分布与检验方法"
+      "English": "can be found here.",
+      "简体中文": "参见该链接。"
     },
     {
-      "en": "It will display as 0.0000 when a p < 0.0001.",
-      "zh_CN": "当 p<0.0001时，将显示为0.0000。"
+      "English": "You can also found them from the vignette of",
+      "简体中文": "也可以阅读帮助文档"
     },
     {
-      "en": "Comparisons",
-      "zh_CN": "显著性检验"
+      "English": "Data Viewer",
+      "简体中文": "数据预览  "
     },
     {
-      "en": "Select statistic methods",
-      "zh_CN": "选择检验方法"
+      "English": "Exploratory Data Analysis",
+      "简体中文": "数据探索分析"
     },
     {
-      "en": "Download",
-      "zh_CN": "下载"
+      "English": "Distribution and Method detection",
+      "简体中文": "数据分布与检验方法"
     },
     {
-      "en": "Data Summary",
-      "zh_CN": "数据摘要"
+      "English": "It will display as 0.0000 when a p less than 0.0001.",
+      "简体中文": "当 p 小于 0.0001 时，将显示为 0.0000"
     },
     {
-      "en": "Label of X axis",
-      "zh_CN": "X 轴标题"
+      "English": "Quantile-Quantile plot, aka. Q-Q plot, is a somewhat subjective visual check. However, it is still a useful tool. In some cases, if the sample size is sufficiently large, Shapiro-Wilk Normality test may detect, even trivial departures from the null hypothesis, (i.e., although there may be some statistically significant effect, it may be too small to be of any practical significance); additional investigation by Q-Q plot is typically advisable.",
+      "简体中文": "分位数-分位数图（Q-Q 图）是一种通过视觉的方式检查数据分布的工具。当数据样本量足够大，Shapiro-Wilk 正态检验对于数据分布与零假设差异会过于敏感（即监测到不具有实际意义的显著性差异)，此时可以通过 Q-Q 进行额外校验。"
     },
     {
-      "en": "Label of each plot",
-      "zh_CN": "图标注"
+      "English": "Comparisons",
+      "简体中文": "显著性检验"
     },
     {
-      "en": "Do you need the statisiics tests?",
-      "zh_CN": "是否显示总体检验结果"
+      "English": "Select statistic methods",
+      "简体中文": "选择检验方法"
     },
     {
-      "en": "Which pairwise comparisons to display?",
-      "zh_CN": "如何显示组间检验结果"
+      "English": "Download",
+      "简体中文": "下载"
     },
     {
-      "en": "Figure numbers per row (up to 10)",
-      "zh_CN": "单行图片数量（最多10张）"
+      "English": "Data Summary",
+      "简体中文": "数据摘要"
     },
     {
-      "en": "Downloaded figure width (inch)",
-      "zh_CN": "下载图片宽度（英寸/inch）"
+      "English": "Label of X axis",
+      "简体中文": "X 轴标题"
     },
     {
-      "en": "Downloaded figure height (inch)",
-      "zh_CN": "下载图片高度（英寸/inch）"
+      "English": "Label of each plot",
+      "简体中文": "图标注"
     },
     {
-      "en": "Acknowledgements & References",
-      "zh_CN": "致谢"
+      "English": "Do you need the statisiics tests?",
+      "简体中文": "是否显示总体检验结果"
+    },
+    // {
+    //   "English": "Show",
+    //   "简体中文": "显示"
+    // },
+    // {
+    //   "English": "Hide",
+    //   "简体中文": "隐藏"
+    // },
+    {
+      "English": "Which pairwise comparisons to display?",
+      "简体中文": "如何显示组间检验结果"
+    },
+    {
+      "English": "Figure numbers per row (up to 10)",
+      "简体中文": "单行图片数量（最多10张）"
+    },
+    {
+      "English": "Downloaded figure width (inch)",
+      "简体中文": "下载图片宽度（英寸/inch）"
+    },
+    {
+      "English": "Downloaded figure height (inch)",
+      "简体中文": "下载图片高度（英寸/inch）"
+    },
+    {
+      "English": "P.S. showing figure on this page and downloading figure implement in different code, even the figure in browser lookes massy or wired, the downloaded figure still can meet the standar of publication level with appropriate parameter sets.",
+      "简体中文": "P.S. 图片尺寸的调整也已下载图片为准。网页显示图片与下载图片并非相同所用代码不同。因此如果当网页显示图片出现问题时，您仍然可以尝试下载图片以获取显示正常的图片。"
+    },
+    {
+      "English": "Acknowledgements and References",
+      "简体中文": "致谢与参考文献"
     }
   ],
   "languages": [
-    "en",
-    "zh_CN"
+    "English",
+    "简体中文"
   ]
 }

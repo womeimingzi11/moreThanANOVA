@@ -2,12 +2,12 @@
 # Define server logic required to draw a histogram
 server <- function(input, output, session) {
   
-  # observeEvent(input$selected_language, {
-  #   # This print is just for demonstration
-  #   print(paste("Language change!", input$selected_language))
-  #   # Here is where we update language in session
-  #   shiny.i18n::update_lang(session, input$selected_language)
-  # })
+  observeEvent(input$selected_language, {
+    # This print is just for demonstration
+    print(paste("Language change!", input$selected_language))
+    # Here is where we update language in session
+    shiny.i18n::update_lang(session, input$selected_language)
+  })
   
   # font_install(source_han_sans())
   source('R/glance_coin.R')

@@ -45,9 +45,10 @@ library(showtext)
 
 # File with translations
 i18n <- Translator$new(translation_json_path = "resource/i18n/translation.json")
-i18n$set_translation_language("en") # here you select the default translation to display
+i18n$set_translation_language("English") # here you select the default translation to display
 # Define UI for application that draws a histogram
 ui <- fluidPage(
+  shiny.i18n::usei18n(i18n),
   disconnectMessage2(),
   tags$head(tags$style(HTML(
     "
@@ -80,17 +81,21 @@ ui <- fluidPage(
         column(
           3,
           h6(
-            "Version: 20210726"
+            "Version: 20210821"
           )
         )
       ),
       includeMarkdown("resource/page/overview.md")
     ),
     tabPanel(
-      i18n$t("Analysis"),
+      title = i18n$t("Analysis"),
       sidebarLayout(
         sidebarPanel(
           img(src = "table_str.png", width = "100%"),
+          selectInput('selected_language',
+                      i18n$t("Switch language/切换语言"),
+                      choices = i18n$get_languages(),
+                      selected = i18n$get_key_translation()),
           h4(i18n$t("Data Source")),
           radioButtons(
             "data_source",
@@ -98,14 +103,14 @@ ui <- fluidPage(
             choices = c(
               "Upload files" = "file",
               "Iris Data (Demo1)" = "demo-iris",
-              "ToothGrowth (Demo2)" = "demo-tooth"
+              "ToothGrowth Data (Demo2)" = "demo-tooth"
             ),
             selected = "demo-tooth"
           ),
           helpText(
-            a(href = "https://archive.ics.uci.edu/ml/datasets/iris", "Iris Data Set"),
+            a(href = "https://archive.ics.uci.edu/ml/datasets/iris", i18n$t("Iris Data Set")),
             tags$br(),
-            a(href = "https://academic.oup.com/jn/article-abstract/33/5/491/4726758?redirectedFrom=fulltext", "ToothGrowth Data Set")
+            a(href = "https://academic.oup.com/jn/article-abstract/33/5/491/4726758?redirectedFrom=fulltext", i18n$t("ToothGrowth Data Set"))
           ),
           conditionalPanel(
             condition = "input.data_source == 'file'",
@@ -117,7 +122,7 @@ ui <- fluidPage(
           h4(i18n$t("Significant level of Shapiro-Wilk test")),
           textInput(
             "sw_signif_level",
-            i18n$t("Set thresheld of Shapiro-Wilk test"),
+            i18n$t("Set threshold of Shapiro-Wilk test"),
             value = "0.05"
           ),
           h4(i18n$t("One and two sample tests")),
@@ -173,27 +178,18 @@ ui <- fluidPage(
             i18n$t("Exploratory Data Analysis"),
             h3(i18n$t("Distribution and Method detection")),
             DTOutput("df_dist_n_method"),
-            helpText(i18n$t("It will display as 0.0000 when a p < 0.0001.")),
+            helpText(i18n$t("It will display as 0.0000 when a p less than 0.0001.")),
             h3("Density Plot"),
             plotOutput("ggplot_hist"),
             h3("Q-Q Plot"),
-            helpText("quantile-quantie plot, aka. Q-Q plot,
-                            is a somewhat subjective visual check.
-                            However, it is still a useful tool.
-                            In some cases, if the sample size is sufficiently large,
-                            Shapiro-Wilk Normality test may detect,
-                            even trivial departures from the null hypothesis,
-                             (i.e., although there may be some statistically significant effect,
-                            it may be too small to be of any practical significance);
-                            additional investigation by Q-Q plot is typically advisable."),
+            helpText(i18n$t("Quantile-Quantile plot, aka. Q-Q plot, is a somewhat subjective visual check. However, it is still a useful tool. In some cases, if the sample size is sufficiently large, Shapiro-Wilk Normality test may detect, even trivial departures from the null hypothesis, (i.e., although there may be some statistically significant effect, it may be too small to be of any practical significance); additional investigation by Q-Q plot is typically advisable.")),
             plotOutput("ggplot_qq")
           ),
           tabPanel(
             i18n$t("Comparisons"),
             h3(i18n$t("Select statistic methods")),
             fluidRow(column(width = 12, uiOutput("method_determine_select"))),
-            helpText("Select statistic methods automatically is not always suitable for every case.
-                            Histgram and Q-Q plot were also helpful for method selection."),
+            helpText(i18n$t("Select statistic methods automatically is not always suitable for every case. Histgram and Q-Q plot were also helpful for method selection.")),
             h3(i18n$t("Significance test between groups")),
             downloadButton(
               "dl_compare_ls",
@@ -337,7 +333,7 @@ ui <- fluidPage(
       )
     ),
     tabPanel(
-      i18n$t("Acknowledgements & References"),
+      title = i18n$t("Acknowledgements and References"),
       includeMarkdown("resource/page/acknowledgements.md")
     )
   )
