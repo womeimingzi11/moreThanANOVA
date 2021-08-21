@@ -4,6 +4,8 @@ This app is powered by `Shiny` package.
 
 The theme is `yeti` from `shinythemes` package.
 
+Internationalization was implemented by `shiny.i18n` package.
+
 The table views are powered by `DT` package.
 
 Data manipulation and figure plot works are powered by `tidyverse` Bundles.
@@ -38,3 +40,5 @@ Spencer Graves, Hans-Peter Piepho and Luciano Selzer with help from Sundar Dorai
 Patil, I. (2018). ggstatsplot: 'ggplot2' Based Plots with Statistical Details. CRAN. Retrieved from https://cran.r-project.org/web/packages/ggstatsplot/index.html
 
 Claus O. Wilke (2019). cowplot: Streamlined Plot Theme and Plot Annotations for 'ggplot2'. R package version 1.0.0. https://CRAN.R-project.org/package=cowplot
+
+Dominik Krzemiński and Krystian Igras (2020). shiny.i18n: Shiny Applications Internationalization. R package version 0.2.0. https://CRAN.R-project.org/package=shiny.i18n

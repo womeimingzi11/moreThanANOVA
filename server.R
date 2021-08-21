@@ -1,6 +1,14 @@
 # Sidebar with a slider input for number of bins)
 # Define server logic required to draw a histogram
-server <- function(input, output) {
+server <- function(input, output, session) {
+  
+  # observeEvent(input$selected_language, {
+  #   # This print is just for demonstration
+  #   print(paste("Language change!", input$selected_language))
+  #   # Here is where we update language in session
+  #   shiny.i18n::update_lang(session, input$selected_language)
+  # })
+  
   # font_install(source_han_sans())
   source('R/glance_coin.R')
   ########################################
@@ -29,12 +37,12 @@ server <- function(input, output) {
     if (input$data_source == 'demo-iris') {
       df <- select(iris, Species, everything())
       tr_name <- colnames(df)[1]
-      rename(df, 'Treatment' = tr_name) %>%
+      rename(df, 'Treatment' = all_of(tr_name)) %>%
         mutate(Treatment = as.factor(Treatment))
     } else if (input$data_source == 'demo-tooth') {
       df <- select(ToothGrowth, supp, everything())
       tr_name <- colnames(df)[1]
-      rename(df, 'Treatment' = tr_name) %>%
+      rename(df, 'Treatment' = all_of(tr_name)) %>%
         mutate(Treatment = as.factor(Treatment))
     } else {
       if (is.null(input$df_upload_file)) {
