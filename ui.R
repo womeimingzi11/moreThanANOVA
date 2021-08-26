@@ -179,7 +179,7 @@ ui <- fluidPage(
             h3(i18n$t("Distribution and Method detection")),
             DTOutput("df_dist_n_method"),
             helpText(i18n$t("It will display as 0.0000 when a p less than 0.0001.")),
-            h3("Density Plot"),
+            h3(i18n$t("Density Plot")),
             plotOutput("ggplot_hist"),
             h3("Q-Q Plot"),
             helpText(i18n$t("Quantile-Quantile plot, aka. Q-Q plot, is a somewhat subjective visual check. However, it is still a useful tool. In some cases, if the sample size is sufficiently large, Shapiro-Wilk Normality test may detect, even trivial departures from the null hypothesis, (i.e., although there may be some statistically significant effect, it may be too small to be of any practical significance); additional investigation by Q-Q plot is typically advisable.")),

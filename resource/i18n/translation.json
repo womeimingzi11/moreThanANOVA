@@ -105,6 +105,10 @@
       "简体中文": "数据探索分析"
     },
     {
+      "English": "Density Plot",
+      "简体中文": "密度图"
+    },
+    {
       "English": "Distribution and Method detection",
       "简体中文": "数据分布与检验方法"
     },
@@ -170,7 +174,7 @@
     },
     {
       "English": "P.S. showing figure on this page and downloading figure implement in different code, even the figure in browser lookes massy or wired, the downloaded figure still can meet the standar of publication level with appropriate parameter sets.",
-      "简体中文": "P.S. 图片尺寸的调整也已下载图片为准。网页显示图片与下载图片并非相同所用代码不同。因此如果当网页显示图片出现问题时，您仍然可以尝试下载图片以获取显示正常的图片。"
+      "简体中文": "P.S. 图片尺寸的调整请以下载图片为准。显示图片与下载图片所调用代码不同，因此当网页显示图片出现问题时，请尝试下载图片以获取显示正常的图片。"
     },
     {
       "English": "Acknowledgements and References",
