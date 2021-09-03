@@ -533,10 +533,10 @@ server <- function(input, output, session) {
         df_tr_var %>%
         group_by(Treatment) %>%
         summarize(
-          Mean = mean(var),
-          SE = sd(var),
-          Median = median(var),
-          IQR = IQR(var)
+          Mean = mean(var, na.rm = TRUE),
+          SE = sd(var, na.rm = TRUE),
+          Median = median(var, na.rm = TRUE),
+          IQR = IQR(var, na.rm = TRUE)
         )
 
       ls_perm_res <-
@@ -581,9 +581,10 @@ server <- function(input, output, session) {
   #       title.prefix = input$title_prefix,
   ########################################
   rct_gg_post_hoc <-
-    reactive({{ if (is.null(input$plot_x_lab)) {
-      return("Please set label of X axis")
-    }
+    reactive({{
+    #   if (is.null(input$plot_x_lab)) {
+    #     return("Please set label of X axis")
+    # }
 
     ########################################
     # Tame data by Treatment,
@@ -593,7 +594,7 @@ server <- function(input, output, session) {
     # therefore, we wrap it up as reactive
     # function
     ########################################
-    rct_df_data_by_tr <- reactive({
+    rct_df_data_by_tr <- 
       rct_df_data() %>%
         pivot_longer(-Treatment) %>%
         ########################################
@@ -610,10 +611,9 @@ server <- function(input, output, session) {
                 .[-1]
             )
         )
-    })
 
     post_hoc_data <-
-      rct_df_data_by_tr() %>%
+      rct_df_data_by_tr %>%
       nest(-name) %>%
       mutate(data = map2(name, data, function(x, y) {
         bind_cols(name = x, y)
@@ -621,8 +621,8 @@ server <- function(input, output, session) {
 
     method_by_select <-
       rct_df_dist_n_method()$Varible %>%
-      map(~ input[[paste("var_", .x)]])
-
+      map(~ input[[paste0("var_", .x)]])
+    
     # get input from dynamic uiOutput
     # I need to use a new trick to access the values the input values.
     # So far we’ve always accessed the components of input with $, e.g. input$col1.
@@ -637,18 +637,13 @@ server <- function(input, output, session) {
     ) %>%
       pmap(function(x, y, z) {
         withProgress(expr = {
-          setProgress(
-            message = "Calculation in progress",
-            detail = "This may take a while...",
-            value = 1
-          )
+          setProgress(message = "Calculation in progress",
+                      detail = "This may take a while...",
+                      value = 1)
           if (x %in%
-            c(
-              "Wilcoxon Signed rank test",
-              "Wilcoxon Rank Sum test",
-              "Kruskal Wallis H test"
-            )
-          ) {
+              c("Wilcoxon Signed rank test",
+                "Wilcoxon Rank Sum test",
+                "Kruskal Wallis H test")) {
             analysis_method <- "nonparametric"
           } else if (x == "t test (equal variance)") {
             # t test (equal variance) should be considered
@@ -660,19 +655,25 @@ server <- function(input, output, session) {
             # This is similar to tukey-karmer test
             analysis_method <- "parametric"
           }
+          
+          print(y)
+          
           showtext_auto()
           ggbetweenstats(
-            data =
-              y,
+            data = y,
             x = Treatment,
             y = value,
             # grouping.var = name,
-            type = if_else(analysis_method == "parametric_variance_equal", "parametric", analysis_method),
+            type = if_else(
+              analysis_method == "parametric_variance_equal",
+              "parametric",
+              analysis_method
+            ),
             nboot = 10,
             plot.type = "box",
             pairwise.comparisons = TRUE,
-            results.subtitle = input$show_statis == "show",
-            var.equal = analysis_method == "parametric_variance_equal",
+            results.subtitle = identical(input$show_statis, "show"),
+            var.equal = identical(analysis_method, "parametric_variance_equal"),
             ggstatsplot.layer = FALSE,
             mean.plotting = FALSE,
             sample.size.label = FALSE,
@@ -685,7 +686,6 @@ server <- function(input, output, session) {
             ylab = z,
             pairwise.display = input$pairwise_display,
             # Outdate and unavaible, Remove
-            # pairwise.annotation = input$pairwise_annotation,
             p.adjust.method = input$p_adjust_method,
             # ggplot theme
             ggplot.component = theme(text = element_text(family = "wqy-microhei"))
@@ -698,6 +698,7 @@ server <- function(input, output, session) {
         align = "h",
         labels = input$cow_lab
       ) }})
+  
   event_rct_gg_post_hoc <- eventReactive(
     input$plot_figure,
     rct_gg_post_hoc()
