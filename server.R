@@ -263,9 +263,9 @@ server <- function(input, output, session) {
         ) %>%
           reduce(left_join, by = "Varible") %>%
           mutate(Method = if_else(Method == "t test",
-            if_else(`Leven test (p.value)` < .05,
-              "t test (equal variance)",
-              "t test (unequal variance)"
+            if_else(`Leven test (p.value)` <= .05,
+              "t test (unequal variance)",
+              "t test (equal variance)"
             ),
             Method
           ))
