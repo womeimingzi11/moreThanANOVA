@@ -92,10 +92,11 @@ ui <- fluidPage(
       sidebarLayout(
         sidebarPanel(
           img(src = "table_str.png", width = "100%"),
-          selectInput('selected_language',
-                      i18n$t("Switch language/切换语言"),
-                      choices = i18n$get_languages(),
-                      selected = i18n$get_key_translation()),
+          selectInput("selected_language",
+            i18n$t("Switch language/切换语言"),
+            choices = i18n$get_languages(),
+            selected = i18n$get_key_translation()
+          ),
           h4(i18n$t("Data Source")),
           radioButtons(
             "data_source",
