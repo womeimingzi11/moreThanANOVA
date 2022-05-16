@@ -119,7 +119,8 @@ ui <- fluidPage(
             condition = "input.data_source == 'file'",
             fileInput(
               inputId = "df_upload_file",
-              label = NULL
+              label = NULL,
+              accept = ".csv"
             )
           ),
           h4(i18n$t("Significant level of Shapiro-Wilk test")),
