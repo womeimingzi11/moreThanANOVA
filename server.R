@@ -138,7 +138,7 @@ server <- function(input, output, session) {
       list(
         Treatment_num = length(sum_df$Variable),
         is_equal = length(unique(sum_df$Freq)) == 1,
-        to_leven = length(sum_df$Variable) == 2
+        to_levene = length(sum_df$Variable) == 2
       )
     })
 
@@ -180,14 +180,14 @@ server <- function(input, output, session) {
   # 2.5. apply Levene’s test to check
   #    variance homogeneity
   #    This reactive function is called
-  #    rct_leven_p
+  #    rct_levene_p
   #    return: tibble
   #    render: DT
   #    colnames: Levene's Test (p.value)
   ########################################
 
-  rct_leven_p <- reactive({
-    if (rct_condition_ls()$to_leven) {
+  rct_levene_p <- reactive({
+    if (rct_condition_ls()$to_levene) {
       # rct_df_data[, -1] %>%
       rct_df_data()[, -1] %>%
         map_dfc(function(value_by_col) {
@@ -244,26 +244,26 @@ server <- function(input, output, session) {
     print(tb_analysis_method)
 
     final_dist_n_method <-
-      if (rct_condition_ls()$to_leven) {
-        tb_leven_p <-
-          pivot_longer(rct_leven_p(),
+      if (rct_condition_ls()$to_levene) {
+        tb_levene_p <-
+          pivot_longer(rct_levene_p(),
             everything(),
             names_to = "Varible",
-            values_to = "Leven test (p.value)"
+            values_to = "Levene test (p.value)"
           ) %>%
-          mutate(`Leven test (p.value)` = as.numeric(`Leven test (p.value)`))
+          mutate(`Levene test (p.value)` = as.numeric(`Levene test (p.value)`))
 
-        print(tb_leven_p)
+        print(tb_levene_p)
 
         list(
           tb_sw_test_pv_long,
           tb_dist_detect_long,
-          tb_leven_p,
+          tb_levene_p,
           tb_analysis_method
         ) %>%
           reduce(left_join, by = "Varible") %>%
           mutate(Method = if_else(Method == "t test",
-            if_else(`Leven test (p.value)` <= .05,
+            if_else(`Levene test (p.value)` <= .05,
               "t test (unequal variance)",
               "t test (equal variance)"
             ),
