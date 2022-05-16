@@ -14,7 +14,7 @@ library(shinythemes)
 library(DT)
 library(shinydisconnect)
 library(shiny.i18n)
-library(shinyvalidate)
+# library(shinyvalidate)
 
 # Package for data manipulation
 library(tidyr)
@@ -118,8 +118,9 @@ ui <- fluidPage(
           conditionalPanel(
             condition = "input.data_source == 'file'",
             fileInput(
-              "df_upload_file",
-              i18n$t("Please upload your data")
+              inputId = "df_upload_file",
+              label = i18n$t("Please upload your data"),
+              accept = ".csv"
             )
           ),
           h4(i18n$t("Significant level of Shapiro-Wilk test")),
