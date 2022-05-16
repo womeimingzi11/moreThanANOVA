@@ -14,6 +14,7 @@ library(shinythemes)
 library(DT)
 library(shinydisconnect)
 library(shiny.i18n)
+library(shinyvalidate)
 
 # Package for data manipulation
 library(tidyr)
@@ -81,7 +82,7 @@ ui <- fluidPage(
         column(
           3,
           h6(
-            "Version: 20210821"
+            "Version: 20220516"
           )
         )
       ),

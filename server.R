@@ -7,7 +7,12 @@ server <- function(input, output, session) {
     # Here is where we update language in session
     shiny.i18n::update_lang(session, input$selected_language)
   })
-
+  
+  inputVal <-
+    InputValidator$new()
+  inputVal$add_rule("df_upload_file", sv_required(message = "Upload a file is required"))
+  inputVal$enable()
+  
   ########################################
   # Data Viewer
   #
