@@ -98,6 +98,7 @@ ui <- fluidPage(
             selected = i18n$get_key_translation()
           ),
           h4(i18n$t("Data Source")),
+          helpText(i18n$t("Please pay attention to the independence of the observations, which require no more than one pair of observations on every individual.")),
           radioButtons(
             "data_source",
             i18n$t("Upload files or try the demo"),
@@ -146,6 +147,7 @@ ui <- fluidPage(
             ),
             selected = "No"
           ),
+          helpText(i18n$t("The Monte Carlo Permutation Tests may be involved in the unknown distribution or small sample size.")),
           h4(i18n$t("Post-Hoc Test")),
           selectInput(
             inputId = "p_adjust_method",
@@ -179,7 +181,7 @@ ui <- fluidPage(
             i18n$t("Exploratory Data Analysis"),
             h3(i18n$t("Distribution and Method detection")),
             DTOutput("df_dist_n_method"),
-            helpText(i18n$t("It will display as 0.0000 when a p less than 0.0001.")),
+            helpText(i18n$t("It will display as 0.0000 when a p value less than 0.0001.")),
             h3(i18n$t("Density Plot")),
             plotOutput("ggplot_hist"),
             h3("Q-Q Plot"),

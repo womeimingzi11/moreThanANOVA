@@ -37,7 +37,7 @@ Salvatore Mangiafico (2020). rcompanion: Functions to Support Extension Educatio
 
 Spencer Graves, Hans-Peter Piepho and Luciano Selzer with help from Sundar Dorai-Raj (2019). multcompView: Visualizations of Paired Comparisons. R package version 0.1-8. https://CRAN.R-project.org/package=multcompView
 
-Patil, I. (2018). ggstatsplot: 'ggplot2' Based Plots with Statistical Details. CRAN. Retrieved from https://cran.r-project.org/web/packages/ggstatsplot/index.html
+Patil, I. (2018). ggstatsplot: 'ggplot2' Based Plots with Statistical Details. R package version 0.9.1. https://CRAN.R-project.org/package=ggstatsplot
 
 Claus O. Wilke (2019). cowplot: Streamlined Plot Theme and Plot Annotations for 'ggplot2'. R package version 1.0.0. https://CRAN.R-project.org/package=cowplot
 
