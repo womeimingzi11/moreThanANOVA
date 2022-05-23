@@ -163,7 +163,7 @@ server <- function(input, output, session) {
               "t test"
             }
           } else {
-            "ANOVA"
+            "one-way ANOVA"
           }
         } else {
           if (rct_condition_ls()$Treatment_num == 2) {
@@ -362,11 +362,11 @@ server <- function(input, output, session) {
           )
         } else if (method %in% c(
           "Kruskal Wallis H test",
-          "ANOVA"
+          "one-way ANOVA"
         )) {
           c(
             "Kruskal Wallis H test",
-            "ANOVA"
+            "one-way ANOVA"
           )
         } else if (method %in% c(
           "Wilcoxon Signed rank test",
@@ -453,21 +453,21 @@ server <- function(input, output, session) {
               method = "Monte Carlo Permutation test"
             ),
         "t test (unequal variance)" =
-        # for param which is not met the standard of anova
+        # for param which is not met the standard of one-way ANOVA
         # t test will be performed
           t.test(var_data ~ rct_df_data()$Treatment, na.action = na.omit, paired = FALSE, var.equal = FALSE) %>%
             broom::glance() %>%
             mutate(df = "") %>%
             select("statistic", "p.value", "df", "method"),
         "t test (equal variance)" =
-        # for param which is not met the standard of anova
+        # for param which is not met the standard of one-way ANOVA
         # t test will be performed
           t.test(var_data ~ rct_df_data()$Treatment, na.action = na.omit, paired = FALSE, var.equal = TRUE) %>%
             broom::glance() %>%
             mutate(df = "") %>%
             select("statistic", "p.value", "df", "method"),
         "Paired t test" =
-        # for param which is not met the standard of anova
+        # for param which is not met the standard of one-way ANOVA
         # t test will be performed
           t.test(var_data ~ rct_df_data()$Treatment, na.action = na.omit, paired = TRUE) %>%
             broom::glance() %>%
@@ -493,7 +493,7 @@ server <- function(input, output, session) {
               "method"
             ) %>%
             mutate(df = as.character(df)),
-        "ANOVA" =
+        "one-way ANOVA" =
           aov(var_data ~ rct_df_data()$Treatment, na.action = na.omit) %>%
             broom::tidy() %>%
             filter(term != "Residuals") %>%
@@ -503,7 +503,7 @@ server <- function(input, output, session) {
               "df"
             ) %>%
             mutate(
-              method = "ANOVA",
+              method = "one-way ANOVA",
               df = as.character(df)
             )
         # TRUE ~ stop("Find an issue in `rct_compare_ls` section, please note chenhan28@gmail.com")

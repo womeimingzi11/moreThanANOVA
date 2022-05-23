@@ -108,7 +108,7 @@ ui <- fluidPage(
               "Iris Data (Demo1)" = "demo-iris",
               "ToothGrowth Data (Demo2)" = "demo-tooth"
             ),
-            selected = "demo-tooth"
+            selected = "demo-iris"
           ),
           helpText(
             a(href = "https://archive.ics.uci.edu/ml/datasets/iris", i18n$t("Iris Data Set")),
@@ -184,6 +184,9 @@ ui <- fluidPage(
             h3(i18n$t("Distribution and Method detection")),
             DTOutput("df_dist_n_method"),
             helpText(i18n$t("It will display as 0.0000 when a p value less than 0.0001.")),
+            helpText(i18n$t("When p-value >= 0.05, there is no statistical significance between these groups, accepting null hypothesis.")),
+            helpText(i18n$t("When p-value < 0.05, there is the statistical significance between groups, accepting alternative hypothesis. If you want to find the significant differences between groups, please continue with Post-Hoc Test in the side bar.")),
+            helpText(i18n$t("")),
             h3(i18n$t("Density Plot")),
             plotOutput("ggplot_hist"),
             h3("Q-Q Plot"),
@@ -201,6 +204,8 @@ ui <- fluidPage(
               i18n$t("Download")
             ),
             DTOutput("compare_ls"),
+            helpText(i18n$t("When p-value >= 0.05, there is no statistical significance between these groups, accepting null hypothesis.")),
+            helpText(i18n$t("When p-value < 0.05, there is the statistical significance between groups, accepting alternative hypothesis. If you want to find the significant differences between groups, please continue with Post-Hoc Test in the side bar.")),
             ########################################
             # Why don't use the DT tool button?
             # Becasue the DT solve data table works
@@ -223,6 +228,7 @@ ui <- fluidPage(
               i18n$t("Download")
             ),
             DTOutput("compare_table"),
+            helpText(i18n$t("For groups/treatments with same significant level (sig_level above), it means there is no significance has been observed between these groups.")),
             h3(i18n$t("Post-Hoc Test")),
             fluidRow(
               column(

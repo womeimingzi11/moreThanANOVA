@@ -1,8 +1,8 @@
-## Why ANOVA
+## Why one-way ANOVA
 
-Once you want to compare some data between different treatments, what you learned from plenty of papers, articles and thesises is using **ANOVA (Analysis of variance)**, even we don't really know what is ANOVA.
+Once you want to compare some data between different treatments, what you learned from plenty of papers, articles and thesises is using **one-way ANOVA (Analysis of variance)**, even we don't really know what is one-way ANOVA.
 
-*Quiz*: Why do you choose ANOVA? Here are probably your answers:
+*Quiz*: Why do you choose one-way ANOVA? Here are probably your answers:
 
 1. Others use it in their own works.
 2. It can compare something.
@@ -10,11 +10,11 @@ Once you want to compare some data between different treatments, what you learne
 
 Howver, what others do are not always right, are they? At least, are not always suitable for any situations.
 
-## Beyond ANOVA
+## Beyond one-way ANOVA
 
-Here, we don't state what is ANOVA, there are amount of articles and videos about this topic.
+Here, we don't state what is one-way ANOVA, there are amount of articles and videos about this topic.
 
-For what I can tell, there is an **premise** of ANOVA, in fact it is a premise for all t-test family, is **Normal Distribution**(also Known as **Gaussian Distribution**). Once your data do not meet normal distribution, maybe you want to transform them, like log(x+1), square-root, log, etc.
+For what I can tell, there is an **premise** of one-way ANOVA, in fact it is a premise for all parametric family, is **Normal Distribution**(also Known as **Gaussian Distribution**). Once your data do not meet normal distribution, maybe you want to transform them, like log(x+1), square-root, log, etc.
 
 However, we are not always lucky dogs, literally, it even never works for me in my current research.
 
