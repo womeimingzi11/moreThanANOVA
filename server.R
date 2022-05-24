@@ -662,14 +662,14 @@ server <- function(input, output, session) {
             analysis_method <- "parametric"
           }
           
-          print(y)
+          # print(y)
           
           showtext_auto()
           ggbetweenstats(
             data = y,
             x = Treatment,
             y = value,
-            # grouping.var = name,
+            grouping.var = name,
             type = if_else(
               analysis_method == "parametric_variance_equal",
               "parametric",
@@ -680,10 +680,8 @@ server <- function(input, output, session) {
             pairwise.comparisons = TRUE,
             results.subtitle = identical(input$show_statis, "show"),
             var.equal = identical(analysis_method, "parametric_variance_equal"),
-            ggstatsplot.layer = FALSE,
             mean.plotting = FALSE,
             sample.size.label = FALSE,
-            messages = TRUE,
             ggtheme = theme_classic(),
             ########################################
             # Customized parameter

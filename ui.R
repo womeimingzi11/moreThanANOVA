@@ -257,7 +257,7 @@ ui <- fluidPage(
                 3,
                 selectInput(
                   inputId = "show_statis",
-                  label = i18n$t("Do you need the statisiics tests?"),
+                  label = i18n$t("Show the parameters of statistic?"),
                   choices = c(
                     "Show" = "show",
                     "Hide" = "hide"
