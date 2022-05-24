@@ -7,6 +7,7 @@
 #
 # Package to fix error from shinyapps.io
 library(markdown)
+library(PMCMRplus)
 #
 # Package for Shiny
 library(shiny)
@@ -82,7 +83,7 @@ ui <- fluidPage(
         column(
           3,
           h6(
-            "Version: 20220516"
+            "Version: 20220524"
           )
         )
       ),
