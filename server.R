@@ -740,6 +740,7 @@ server <- function(input, output, session) {
 
   output$gg_post_hoc <-
     renderPlot({
+      showtext_auto()
       event_rct_gg_post_hoc()
     })
   ########################################
