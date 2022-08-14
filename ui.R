@@ -71,7 +71,8 @@ ui <- fluidPage(
           h4(
             i18n$t("Author:"),
             a(href = "https://blog.washman.top", i18n$t("Han Chen")),
-            i18n$t("and Wanyanhan Jiang")
+            i18n$t(", Wanyanhan Jiang"),
+            ("and A·JM·Woo")
           )
         ),
         column(
@@ -83,7 +84,7 @@ ui <- fluidPage(
         column(
           3,
           h6(
-            "Version: 20220524"
+            "Version: 20220814"
           )
         )
       ),
