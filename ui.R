@@ -72,7 +72,7 @@ ui <- fluidPage(
             i18n$t("Author:"),
             a(href = "https://blog.washman.top", i18n$t("Han Chen")),
             i18n$t(", Wanyanhan Jiang"),
-            ("and A·JM·Woo")
+            ("and A JM. Woo")
           )
         ),
         column(
