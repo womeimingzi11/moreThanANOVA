@@ -5,7 +5,9 @@ server <- function(input, output, session) {
     # This print is just for demonstration
     print(paste("Language change!", input$selected_language))
     # Here is where we update language in session
-    shiny.i18n::update_lang(session, input$selected_language)
+    #shiny.i18n::update_lang(session, input$selected_language)
+    update_lang(input$selected_language, session)
+    
   })
   
   inputVal <-

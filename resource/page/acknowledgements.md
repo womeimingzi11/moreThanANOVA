@@ -24,7 +24,7 @@ Pohlert T (2022). _PMCMRplus: Calculate Pairwise Multiple Comparisons of Mean Ra
 
 Allaire J, Horner J, Xie Y, Marti V, Porte N (2019). _markdown: Render Markdown with the C Library 'Sundown'_. R package version 1.1, <https://CRAN.R-project.org/package=markdown>.
 
-# Iannone R, Cheng J (2022). _shinyvalidate: Input Validation for Shiny Apps_. R package version 0.1.2, <https://CRAN.R-project.org/package=shinyvalidate>
+Iannone R, Cheng J (2022). _shinyvalidate: Input Validation for Shiny Apps_. R package version 0.1.2, <https://CRAN.R-project.org/package=shinyvalidate>
 
 Winston Chang, Joe Cheng, JJ Allaire, Yihui Xie and Jonathan McPherson (2020). _shiny: Web Application Framework for R_. R package version 1.4.0.2. <https://CRAN.R-project.org/package=shiny>
 
