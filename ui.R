@@ -84,7 +84,7 @@ ui <- fluidPage(
         column(
           3,
           h6(
-            "Version: 20220814"
+            "Version: 20241106"
           )
         )
       ),
