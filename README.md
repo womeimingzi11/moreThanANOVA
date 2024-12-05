@@ -1,5 +1,8 @@
 # moreThanANOVA
 
+## Cite Me
+Jiang W, Chen H, Yang L, Pan X (2022) moreThanANOVA: A user-friendly Shiny/R application for exploring and comparing data with interactive visualization. PLOS ONE 17(7): e0271185. https://doi.org/10.1371/journal.pone.0271185
+
 ## Why ANOVA
 
 Once you want to compare some data between different treatments, what you learned from plenty of papers, articles and theses is applying **ANOVAs (Analysis of variance)**, even we don't really know what is ANOVA.
