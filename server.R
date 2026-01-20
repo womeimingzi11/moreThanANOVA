@@ -3,7 +3,7 @@
 library(Rcpp)
 sourceCpp("src/permutation.cpp")
 
-pairwise_perm_cpp <- function(formula, data, method = "fdr") {
+pairwise_perm_cpp <- function(formula, data, method = "fdr", n_perms = 999) {
   vars <- all.vars(formula)
   resp <- vars[1]
   grp <- vars[2]
@@ -21,9 +21,13 @@ pairwise_perm_cpp <- function(formula, data, method = "fdr") {
     val1 <- data[[resp]][data[[grp]] == g1]
     val2 <- data[[resp]][data[[grp]] == g2]
 
-    res <- perm_test_2sample(as.numeric(val1), as.numeric(val2), n_perms = 999)
+    res <- perm_test_2sample(
+      as.numeric(val1),
+      as.numeric(val2),
+      n_perms = n_perms
+    )
     p_values[i] <- res$p.value
-    comparisons[i] <- paste(g1, "-", g2)
+    comparisons[i] <- paste(g1, g2, sep = "-")
   }
 
   p.adj <- p.adjust(p_values, method = method)
@@ -496,7 +500,11 @@ server <- function(input, output, session) {
             res_perm <- perm_test_ksample(
               as.numeric(var_data),
               as.integer(factor(rct_df_data()$Treatment)),
-              n_perms = 999
+              n_perms = if (!is.null(input$n_perms)) {
+                as.numeric(input$n_perms)
+              } else {
+                9999
+              }
             )
             tibble(
               statistic = res_perm$statistic,
@@ -623,11 +631,18 @@ server <- function(input, output, session) {
             IQR = IQR(var, na.rm = TRUE)
           )
 
+        # Use C++ Permutation Test for ALL pairwise comparisons as requested
+        # This ensures high performance and robustness regardless of distribution
         ls_perm_res <-
           pairwise_perm_cpp(
             var ~ Treatment,
             data = df_tr_var,
-            method = input$p_adjust_method
+            method = input$p_adjust_method,
+            n_perms = if (!is.null(input$n_perms)) {
+              as.numeric(input$n_perms)
+            } else {
+              9999
+            }
           )
 
         df_pair_perm <-

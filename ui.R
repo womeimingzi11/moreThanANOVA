@@ -159,6 +159,15 @@ ui <- fluidPage(
             choices = c("No", "Monte Carlo Permutation Tests" = "perm"),
             selected = "No"
           ),
+          conditionalPanel(
+            condition = "input.is_perm == 'perm'",
+            selectInput(
+              inputId = "n_perms",
+              label = i18n$t("Number of Permutations"),
+              choices = c("999" = 999, "9999" = 9999, "99999" = 99999),
+              selected = 9999
+            )
+          ),
           helpText(i18n$t(
             "The Monte Carlo Permutation Tests may be involved in the unknown distribution or small sample size."
           )),
