@@ -95,13 +95,16 @@ ui <- fluidPage(
       sidebarLayout(
         sidebarPanel(
           img(src = "table_str.png", width = "100%"),
-          selectInput("selected_language",
+          selectInput(
+            "selected_language",
             i18n$t("Switch language/切换语言"),
             choices = i18n$get_languages(),
             selected = i18n$get_key_translation()
           ),
           h4(i18n$t("Data Source")),
-          helpText(i18n$t("Please pay attention to the independence of the observations, which require no more than one pair of observations on every individual.")),
+          helpText(i18n$t(
+            "Please pay attention to the independence of the observations, which require no more than one pair of observations on every individual."
+          )),
           radioButtons(
             "data_source",
             i18n$t("Upload files or try the demo"),
@@ -113,9 +116,15 @@ ui <- fluidPage(
             selected = "demo-iris"
           ),
           helpText(
-            a(href = "https://archive.ics.uci.edu/ml/datasets/iris", i18n$t("Iris Data Set")),
+            a(
+              href = "https://archive.ics.uci.edu/ml/datasets/iris",
+              i18n$t("Iris Data Set")
+            ),
             tags$br(),
-            a(href = "https://academic.oup.com/jn/article-abstract/33/5/491/4726758?redirectedFrom=fulltext", i18n$t("ToothGrowth Data Set"))
+            a(
+              href = "https://academic.oup.com/jn/article-abstract/33/5/491/4726758?redirectedFrom=fulltext",
+              i18n$t("ToothGrowth Data Set")
+            )
           ),
           conditionalPanel(
             condition = "input.data_source == 'file'",
@@ -134,28 +143,34 @@ ui <- fluidPage(
           h4(i18n$t("One and two sample tests")),
           selectInput(
             inputId = "try_paired",
-            label = i18n$t("Whether you want a paired t-test/Wilcoxon Signed-Rank test?"),
+            label = i18n$t(
+              "Whether you want a paired t-test/Wilcoxon Signed-Rank test?"
+            ),
             choices = c(
               "2-Sample/Unpaired",
               "1-Sample/Paired" = "paired"
             ),
             selected = "2-Sample/Unpaired"
           ),
-          helpText(i18n$t("Applicable for cases which each group has same number of observation.")),
+          helpText(i18n$t(
+            "Applicable for cases which each group has same number of observation."
+          )),
           h4(i18n$t("Significance test between groups")),
           selectInput(
             inputId = "is_perm",
             label = i18n$t("Whether you want a permutation test?"),
-            choices = c("No",
-              "Monte Carlo Permutation Tests" = "perm"
-            ),
+            choices = c("No", "Monte Carlo Permutation Tests" = "perm"),
             selected = "No"
           ),
-          helpText(i18n$t("The Monte Carlo Permutation Tests may be involved in the unknown distribution or small sample size.")),
+          helpText(i18n$t(
+            "The Monte Carlo Permutation Tests may be involved in the unknown distribution or small sample size."
+          )),
           h4(i18n$t("Post-Hoc Test")),
           selectInput(
             inputId = "p_adjust_method",
-            label = i18n$t("Adjustment method for p-value for multiple comparisons."),
+            label = i18n$t(
+              "Adjustment method for p-value for multiple comparisons."
+            ),
             choices = p.adjust.methods,
             selected = ifelse(
               length(grep("bonferroni", p.adjust.methods)) == 0,
@@ -164,7 +179,9 @@ ui <- fluidPage(
             )
           ),
           helpText(
-            i18n$t("The details of adjustment method fo p-value for multiple comparisons"),
+            i18n$t(
+              "The details of adjustment method fo p-value for multiple comparisons"
+            ),
             a(
               href = "https://www.rdocumentation.org/packages/stats/versions/3.6.2/topics/p.adjust",
               i18n$t("can be found here.")
@@ -177,37 +194,50 @@ ui <- fluidPage(
         # Show a plot of the generated distribution
         mainPanel(tabsetPanel(
           tabPanel(
-            title =
-              i18n$t("Data Viewer"),
+            title = i18n$t("Data Viewer"),
             DTOutput("df_com")
           ),
           tabPanel(
             i18n$t("Exploratory Data Analysis"),
             h3(i18n$t("Distribution and Method detection")),
             DTOutput("df_dist_n_method"),
-            helpText(i18n$t("It will display as 0.0000 when a p value less than 0.0001.")),
-            helpText(i18n$t("When p-value >= 0.05, there is no statistical significance between these groups, accepting null hypothesis.")),
-            helpText(i18n$t("When p-value < 0.05, there is the statistical significance between groups, accepting alternative hypothesis. If you want to find the significant differences between groups, please continue with Post-Hoc Test in the side bar.")),
+            helpText(i18n$t(
+              "It will display as 0.0000 when a p value less than 0.0001."
+            )),
+            helpText(i18n$t(
+              "When p-value >= 0.05, there is no statistical significance between these groups, accepting null hypothesis."
+            )),
+            helpText(i18n$t(
+              "When p-value < 0.05, there is the statistical significance between groups, accepting alternative hypothesis. If you want to find the significant differences between groups, please continue with Post-Hoc Test in the side bar."
+            )),
             helpText(i18n$t("")),
             h3(i18n$t("Density Plot")),
             plotOutput("ggplot_hist"),
             h3("Q-Q Plot"),
-            helpText(i18n$t("Quantile-Quantile plot, aka. Q-Q plot, is a somewhat subjective visual check. However, it is still a useful tool. In some cases, if the sample size is sufficiently large, Shapiro-Wilk Normality test may detect, even trivial departures from the null hypothesis, (i.e., although there may be some statistically significant effect, it may be too small to be of any practical significance); additional investigation by Q-Q plot is typically advisable.")),
+            helpText(i18n$t(
+              "Quantile-Quantile plot, aka. Q-Q plot, is a somewhat subjective visual check. However, it is still a useful tool. In some cases, if the sample size is sufficiently large, Shapiro-Wilk Normality test may detect, even trivial departures from the null hypothesis, (i.e., although there may be some statistically significant effect, it may be too small to be of any practical significance); additional investigation by Q-Q plot is typically advisable."
+            )),
             plotOutput("ggplot_qq")
           ),
           tabPanel(
             i18n$t("Comparisons"),
             h3(i18n$t("Select statistic methods")),
             fluidRow(column(width = 12, uiOutput("method_determine_select"))),
-            helpText(i18n$t("Select statistic methods automatically is not always suitable for every case. Histgram and Q-Q plot were also helpful for method selection.")),
+            helpText(i18n$t(
+              "Select statistic methods automatically is not always suitable for every case. Histgram and Q-Q plot were also helpful for method selection."
+            )),
             h3(i18n$t("Significance test between groups")),
             downloadButton(
               "dl_compare_ls",
               i18n$t("Download")
             ),
             DTOutput("compare_ls"),
-            helpText(i18n$t("When p-value >= 0.05, there is no statistical significance between these groups, accepting null hypothesis.")),
-            helpText(i18n$t("When p-value < 0.05, there is the statistical significance between groups, accepting alternative hypothesis. If you want to find the significant differences between groups, please continue with Post-Hoc Test in the side bar.")),
+            helpText(i18n$t(
+              "When p-value >= 0.05, there is no statistical significance between these groups, accepting null hypothesis."
+            )),
+            helpText(i18n$t(
+              "When p-value < 0.05, there is the statistical significance between groups, accepting alternative hypothesis. If you want to find the significant differences between groups, please continue with Post-Hoc Test in the side bar."
+            )),
             ########################################
             # Why don't use the DT tool button?
             # Becasue the DT solve data table works
@@ -230,7 +260,9 @@ ui <- fluidPage(
               i18n$t("Download")
             ),
             DTOutput("compare_table"),
-            helpText(i18n$t("For groups/treatments with same significant level (sig_level above), it means there is no significance has been observed between these groups.")),
+            helpText(i18n$t(
+              "For groups/treatments with same significant level (sig_level above), it means there is no significance has been observed between these groups."
+            )),
             h3(i18n$t("Post-Hoc Test")),
             fluidRow(
               column(
@@ -332,7 +364,9 @@ ui <- fluidPage(
               "to download it directly."
             ),
             helpText(
-              i18n$t("P.S. showing figure on this page and downloading figure implement in different code, even the figure in browser lookes massy or wired, the downloaded figure still can meet the standar of publication level with appropriate parameter sets.")
+              i18n$t(
+                "P.S. showing figure on this page and downloading figure implement in different code, even the figure in browser lookes massy or wired, the downloaded figure still can meet the standar of publication level with appropriate parameter sets."
+              )
             ),
             actionButton(
               "plot_figure",

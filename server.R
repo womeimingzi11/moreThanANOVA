@@ -6,16 +6,20 @@ server <- function(input, output, session) {
     print(paste("Language change!", input$selected_language))
     # Here is where we update language in session
     #shiny.i18n::update_lang(session, input$selected_language)
-    shiny.i18n::update_lang(language = input$selected_language, 
-                            session = session)
-    
+    shiny.i18n::update_lang(
+      language = input$selected_language,
+      session = session
+    )
   })
-  
+
   inputVal <-
     InputValidator$new()
-  inputVal$add_rule("df_upload_file", sv_required(message = "Upload a file is required"))
+  inputVal$add_rule(
+    "df_upload_file",
+    sv_required(message = "Upload a file is required")
+  )
   inputVal$enable()
-  
+
   ########################################
   # Data Viewer
   #
@@ -38,7 +42,7 @@ server <- function(input, output, session) {
   #    return: tibble
   #    render: DT
   ########################################
-  
+
   rct_df_data <- reactive({
     if (input$data_source == "demo-iris") {
       df <- select(iris, Species, everything())
@@ -111,10 +115,13 @@ server <- function(input, output, session) {
 
   rct_dist_detect <- reactive({
     rct_df_sw_test_pv() %>%
-      map_dfc(~ if_else(.x >= as.numeric(input$sw_signif_level),
-        "normal",
-        "non-normal"
-      ))
+      map_dfc(
+        ~ if_else(
+          .x >= as.numeric(input$sw_signif_level),
+          "normal",
+          "non-normal"
+        )
+      )
   })
 
   ########################################
@@ -221,48 +228,43 @@ server <- function(input, output, session) {
   ########################################
   rct_df_dist_n_method <- reactive({
     tb_sw_test_pv_long <-
-      pivot_longer(rct_df_sw_test_pv(),
+      pivot_longer(
+        rct_df_sw_test_pv(),
         everything(),
         names_to = "Varible",
         values_to = "p.value"
       ) %>%
       mutate(
-        "p.value" =
-          sprintf("%.4f", `p.value`)
+        "p.value" = sprintf("%.4f", `p.value`)
       ) %>%
       rename(`Shapiro-Wilk (p.value)` = `p.value`)
 
-    print(tb_sw_test_pv_long)
-
     tb_dist_detect_long <-
-      pivot_longer(rct_dist_detect(),
+      pivot_longer(
+        rct_dist_detect(),
         everything(),
         names_to = "Varible",
         values_to = "Distribution"
       )
 
-    print(tb_dist_detect_long)
-
     tb_analysis_method <-
-      pivot_longer(rct_analysis_method(),
+      pivot_longer(
+        rct_analysis_method(),
         everything(),
         names_to = "Varible",
         values_to = "Method"
       )
 
-    print(tb_analysis_method)
-
     final_dist_n_method <-
       if (rct_condition_ls()$to_levene) {
         tb_levene_p <-
-          pivot_longer(rct_levene_p(),
+          pivot_longer(
+            rct_levene_p(),
             everything(),
             names_to = "Varible",
             values_to = "Levene test (p.value)"
           ) %>%
           mutate(`Levene test (p.value)` = as.numeric(`Levene test (p.value)`))
-
-        print(tb_levene_p)
 
         list(
           tb_sw_test_pv_long,
@@ -271,13 +273,17 @@ server <- function(input, output, session) {
           tb_analysis_method
         ) %>%
           reduce(left_join, by = "Varible") %>%
-          mutate(Method = if_else(Method == "t test",
-            if_else(`Levene test (p.value)` <= .05,
-              "t test (unequal variance)",
-              "t test (equal variance)"
-            ),
-            Method
-          ))
+          mutate(
+            Method = if_else(
+              Method == "t test",
+              if_else(
+                `Levene test (p.value)` <= .05,
+                "t test (unequal variance)",
+                "t test (equal variance)"
+              ),
+              Method
+            )
+          )
       } else {
         list(
           tb_sw_test_pv_long,
@@ -286,12 +292,9 @@ server <- function(input, output, session) {
         ) %>%
           reduce(left_join, by = "Varible")
       }
-    print(final_dist_n_method)
 
     final_dist_n_method
   })
-
-
 
   ########################################
   # 4. we plot the histgram of each
@@ -311,9 +314,7 @@ server <- function(input, output, session) {
       mutate(name = factor(name, levels = unique(name))) %>%
       ggplot(aes(value)) +
       geom_density(fill = "skyblue") +
-      facet_wrap(vars(name),
-        scales = "free"
-      ) +
+      facet_wrap(vars(name), scales = "free") +
       theme_classic()
   })
 
@@ -336,9 +337,7 @@ server <- function(input, output, session) {
       ggplot(aes(sample = value)) +
       stat_qq() +
       stat_qq_line() +
-      facet_wrap(vars(name),
-        scales = "free"
-      ) +
+      facet_wrap(vars(name), scales = "free") +
       theme_classic()
   })
 
@@ -351,48 +350,61 @@ server <- function(input, output, session) {
   #    return: uiOutput
   ########################################
   rct_select_method_determine <- reactive({
-    map2(rct_df_dist_n_method()$Varible, rct_df_dist_n_method()$Method, function(var, method) {
-      alternative_method <-
-        if (method %in% c(
-          "Wilcoxon Rank Sum test",
-          "t test (unequal variance)",
-          "t test (equal variance)"
-        )) {
-          c(
-            "Wilcoxon Rank Sum test",
-            "t test (unequal variance)",
-            "t test (equal variance)"
-          )
-        } else if (method %in% c(
-          "Kruskal Wallis H test",
-          "one-way ANOVA"
-        )) {
-          c(
-            "Kruskal Wallis H test",
-            "one-way ANOVA"
-          )
-        } else if (method %in% c(
-          "Wilcoxon Signed rank test",
-          "Paired t test"
-        )) {
-          c(
-            "Wilcoxon Signed rank test",
-            "Paired t test"
-          )
-        } else {
-          "Permutation test"
-        }
+    map2(
+      rct_df_dist_n_method()$Varible,
+      rct_df_dist_n_method()$Method,
+      function(var, method) {
+        alternative_method <-
+          if (
+            method %in%
+              c(
+                "Wilcoxon Rank Sum test",
+                "t test (unequal variance)",
+                "t test (equal variance)"
+              )
+          ) {
+            c(
+              "Wilcoxon Rank Sum test",
+              "t test (unequal variance)",
+              "t test (equal variance)"
+            )
+          } else if (
+            method %in%
+              c(
+                "Kruskal Wallis H test",
+                "one-way ANOVA"
+              )
+          ) {
+            c(
+              "Kruskal Wallis H test",
+              "one-way ANOVA"
+            )
+          } else if (
+            method %in%
+              c(
+                "Wilcoxon Signed rank test",
+                "Paired t test"
+              )
+          ) {
+            c(
+              "Wilcoxon Signed rank test",
+              "Paired t test"
+            )
+          } else {
+            "Permutation test"
+          }
 
-      column(
-        width = 4,
-        selectInput(
-          inputId = paste0("var_", var),
-          label = paste("Method for", var),
-          choices = alternative_method,
-          selected = method
+        column(
+          width = 4,
+          selectInput(
+            inputId = paste0("var_", var),
+            label = paste("Method for", var),
+            choices = alternative_method,
+            selected = method
+          )
         )
-      )
-    })
+      }
+    )
   })
 
   ########################################
@@ -431,23 +443,25 @@ server <- function(input, output, session) {
   #    render: DT - with Buttons
   ########################################
   rct_compare_ls <- reactive({
-    map2(rct_df_dist_n_method()$Varible, rct_df_data()[, -1], function(var_name, var_data) {
-      # get input from dynamic uiOutput
-      # I need to use a new trick to access the values the input values.
-      # So far we’ve always accessed the components of input with $, e.g. input$col1.
-      # But here we have the input names in a character vector,
-      # like var <- "col1". $ no longer works in this scenario,
-      # so we need to swich to [[, i.e. input[[var]].
+    map2(
+      rct_df_dist_n_method()$Varible,
+      rct_df_data()[, -1],
+      function(var_name, var_data) {
+        # get input from dynamic uiOutput
+        # I need to use a new trick to access the values the input values.
+        # So far we’ve always accessed the components of input with $, e.g. input$col1.
+        # But here we have the input names in a character vector,
+        # like var <- "col1". $ no longer works in this scenario,
+        # so we need to swich to [[, i.e. input[[var]].
 
-      var_method <-
-        input[[paste0("var_", var_name)]]
+        var_method <-
+          input[[paste0("var_", var_name)]]
 
-      print(var_method)
-
-      switch(var_method,
-        "Permutation test" =
-          independence_test(var_data ~ factor(rct_df_data()$Treatment),
-            distribution = approximate(nresample = 9999)
+        switch(
+          var_method,
+          "Permutation test" = independence_test(
+            var_data ~ factor(rct_df_data()$Treatment),
+            distribution = approximate(nresample = 999)
           ) %>%
             tibble(
               statistic = statistic(.),
@@ -455,49 +469,67 @@ server <- function(input, output, session) {
               df = "",
               method = "Monte Carlo Permutation test"
             ),
-        "t test (unequal variance)" =
-        # for param which is not met the standard of one-way ANOVA
-        # t test will be performed
-          t.test(var_data ~ rct_df_data()$Treatment, na.action = na.omit, paired = FALSE, var.equal = FALSE) %>%
+          # for param which is not met the standard of one-way ANOVA
+          # t test will be performed
+          "t test (unequal variance)" = t.test(
+            var_data ~ rct_df_data()$Treatment,
+            na.action = na.omit,
+            paired = FALSE,
+            var.equal = FALSE
+          ) %>%
             broom::glance() %>%
             mutate(df = "") %>%
             select("statistic", "p.value", "df", "method"),
-        "t test (equal variance)" =
-        # for param which is not met the standard of one-way ANOVA
-        # t test will be performed
-          t.test(var_data ~ rct_df_data()$Treatment, na.action = na.omit, paired = FALSE, var.equal = TRUE) %>%
+          # for param which is not met the standard of one-way ANOVA
+          # t test will be performed
+          "t test (equal variance)" = t.test(
+            var_data ~ rct_df_data()$Treatment,
+            na.action = na.omit,
+            paired = FALSE,
+            var.equal = TRUE
+          ) %>%
             broom::glance() %>%
             mutate(df = "") %>%
             select("statistic", "p.value", "df", "method"),
-        "Paired t test" =
-        # for param which is not met the standard of one-way ANOVA
-        # t test will be performed
-          t.test(var_data ~ rct_df_data()$Treatment, na.action = na.omit, paired = TRUE) %>%
+          # for param which is not met the standard of one-way ANOVA
+          # t test will be performed
+          "Paired t test" = t.test(
+            var_data ~ rct_df_data()$Treatment,
+            na.action = na.omit,
+            paired = TRUE
+          ) %>%
             broom::glance() %>%
             mutate(df = "") %>%
             select("statistic", "p.value", "df", "method"),
-        "Wilcoxon Signed rank test" =
-          wilcox.test(var_data ~ rct_df_data()$Treatment, na.action = na.omit, paired = TRUE) %>%
+          "Wilcoxon Signed rank test" = wilcox.test(
+            var_data ~ rct_df_data()$Treatment,
+            na.action = na.omit,
+            paired = TRUE
+          ) %>%
             broom::glance() %>%
             mutate(df = "") %>%
             select("statistic", "p.value", "df", "method"),
-        "Wilcoxon Rank Sum test" =
-          wilcox.test(var_data ~ rct_df_data()$Treatment, na.action = na.omit, paired = FALSE) %>%
+          "Wilcoxon Rank Sum test" = wilcox.test(
+            var_data ~ rct_df_data()$Treatment,
+            na.action = na.omit,
+            paired = FALSE
+          ) %>%
             broom::glance() %>%
             mutate(df = "") %>%
             select("statistic", "p.value", "df", "method"),
-        "Kruskal Wallis H test" =
-        # the fallback method is kruskal.test
-          kruskal.test(var_data, rct_df_data()$Treatment, na.action = na.omit) %>%
+          # the fallback method is kruskal.test
+          "Kruskal Wallis H test" = kruskal.test(
+            var_data,
+            rct_df_data()$Treatment,
+            na.action = na.omit
+          ) %>%
             broom::glance() %>%
-            select("statistic",
-              "p.value",
-              "df" = "parameter",
-              "method"
-            ) %>%
+            select("statistic", "p.value", "df" = "parameter", "method") %>%
             mutate(df = as.character(df)),
-        "one-way ANOVA" =
-          aov(var_data ~ rct_df_data()$Treatment, na.action = na.omit) %>%
+          "one-way ANOVA" = aov(
+            var_data ~ rct_df_data()$Treatment,
+            na.action = na.omit
+          ) %>%
             broom::tidy() %>%
             filter(term != "Residuals") %>%
             select(
@@ -509,9 +541,10 @@ server <- function(input, output, session) {
               method = "one-way ANOVA",
               df = as.character(df)
             )
-        # TRUE ~ stop("Find an issue in `rct_compare_ls` section, please note chenhan28@gmail.com")
-      )
-    }) %>%
+          # TRUE ~ stop("Find an issue in `rct_compare_ls` section, please note chenhan28@gmail.com")
+        )
+      }
+    ) %>%
       bind_rows() %>%
       bind_cols(
         tibble(variable = colnames(rct_analysis_method())),
@@ -530,46 +563,54 @@ server <- function(input, output, session) {
   ########################################
 
   rct_compare_table <- reactive({
-    map2(colnames(rct_df_data()[, -1]), rct_df_data()[, -1], function(x, y) {
-      df_tr_var <-
-        bind_cols(
-          Treatment =
-            rct_df_data()[, 1],
-          var = y
+    withProgress(message = "Calculating pairwise permutation...", value = 0, {
+      vars <- colnames(rct_df_data()[, -1])
+      n <- length(vars)
+      map2(vars, rct_df_data()[, -1], function(x, y) {
+        setProgress(
+          value = which(vars == x) / n,
+          detail = paste("Processing", x)
         )
+        df_tr_var <-
+          bind_cols(
+            Treatment = rct_df_data()[, 1],
+            var = y
+          )
 
-      df_comp_ls <-
-        df_tr_var %>%
-        group_by(Treatment) %>%
-        summarize(
-          Mean = mean(var, na.rm = TRUE),
-          SE = sd(var, na.rm = TRUE),
-          Median = median(var, na.rm = TRUE),
-          IQR = IQR(var, na.rm = TRUE)
-        )
+        df_comp_ls <-
+          df_tr_var %>%
+          group_by(Treatment) %>%
+          summarize(
+            Mean = mean(var, na.rm = TRUE),
+            SE = sd(var, na.rm = TRUE),
+            Median = median(var, na.rm = TRUE),
+            IQR = IQR(var, na.rm = TRUE)
+          )
 
-      ls_perm_res <-
-        pairwisePermutationMatrix(var ~ Treatment,
-          data = df_tr_var,
-          method = input$p_adjust_method
-        )
+        ls_perm_res <-
+          pairwisePermutationMatrix(
+            var ~ Treatment,
+            data = df_tr_var,
+            method = input$p_adjust_method
+          )
 
-      df_pair_perm <-
-        multcompLetters(
-          ls_perm_res$Adjusted,
-          # compare="<",
-          threshold = 0.05,
-          Letters = letters,
-          reversed = FALSE
-        )
+        df_pair_perm <-
+          multcompLetters(
+            ls_perm_res$Adjusted,
+            # compare="<",
+            threshold = 0.05,
+            Letters = letters,
+            reversed = FALSE
+          )
 
-      bind_cols(list(
-        Variable = x,
-        df_comp_ls,
-        sig_level = df_pair_perm$Letters
-      ))
-    }) %>%
-      bind_rows()
+        bind_cols(list(
+          Variable = x,
+          df_comp_ls,
+          sig_level = df_pair_perm$Letters
+        ))
+      }) %>%
+        bind_rows()
+    })
   })
 
   ########################################
@@ -590,122 +631,138 @@ server <- function(input, output, session) {
   #       title.prefix = input$title_prefix,
   ########################################
   rct_gg_post_hoc <-
-    reactive({{
-    #   if (is.null(input$plot_x_lab)) {
-    #     return("Please set label of X axis")
-    # }
+    reactive({
+      {
+        #   if (is.null(input$plot_x_lab)) {
+        #     return("Please set label of X axis")
+        # }
 
-    ########################################
-    # Tame data by Treatment,
-    # It will be used in rct_df_data_by_tr
-    # (distribution plot) and
-    # rct_gg_post_hoc (post hoc tests).
-    # therefore, we wrap it up as reactive
-    # function
-    ########################################
-    rct_df_data_by_tr <- 
-      rct_df_data() %>%
-        pivot_longer(-Treatment) %>%
         ########################################
-        # To make the orders of figure follow
-        # the input table.
-        # We convert the variable name into
-        # factor and control the order of plot
-        # by the level
+        # Tame data by Treatment,
+        # It will be used in rct_df_data_by_tr
+        # (distribution plot) and
+        # rct_gg_post_hoc (post hoc tests).
+        # therefore, we wrap it up as reactive
+        # function
         ########################################
-        dplyr::mutate(
-          name =
-            factor(name,
+        rct_df_data_by_tr <-
+          rct_df_data() %>%
+          pivot_longer(-Treatment) %>%
+          ########################################
+          # To make the orders of figure follow
+          # the input table.
+          # We convert the variable name into
+          # factor and control the order of plot
+          # by the level
+          ########################################
+          dplyr::mutate(
+            name = factor(
+              name,
               levels = colnames(rct_df_data()) %>%
                 .[-1]
             )
-        )
-
-    post_hoc_data <-
-      rct_df_data_by_tr %>%
-      nest(-name) %>%
-      mutate(data = map2(name, data, function(x, y) {
-        bind_cols(name = x, y)
-      }))
-
-    method_by_select <-
-      rct_df_dist_n_method()$Varible %>%
-      map(~ input[[paste0("var_", .x)]])
-    
-    # get input from dynamic uiOutput
-    # I need to use a new trick to access the values the input values.
-    # So far we’ve always accessed the components of input with $, e.g. input$col1.
-    # But here we have the input names in a character vector,
-    # like var <- "col1". $ no longer works in this scenario,
-    # so we need to swich to [[, i.e. input[[var]].
-
-    list(
-      method_by_select,
-      post_hoc_data$data,
-      post_hoc_data$name
-    ) %>%
-      pmap(function(x, y, z) {
-        withProgress(expr = {
-          setProgress(message = "Calculation in progress",
-                      detail = "This may take a while...",
-                      value = 1)
-          if (x %in%
-              c("Wilcoxon Signed rank test",
-                "Wilcoxon Rank Sum test",
-                "Kruskal Wallis H test")) {
-            analysis_method <- "nonparametric"
-          } else if (x == "t test (equal variance)") {
-            # t test (equal variance) should be considered
-            # a special name
-            analysis_method <- "parametric_variance_equal"
-          } else {
-            # In ggstatsplot, parametric test will performed by
-            # games howell post-hoc test
-            # This is similar to tukey-karmer test
-            analysis_method <- "parametric"
-          }
-          
-          # print(y)
-          
-          showtext_auto()
-          ggbetweenstats(
-            data = y,
-            x = Treatment,
-            y = value,
-            grouping.var = name,
-            type = if_else(
-              analysis_method == "parametric_variance_equal",
-              "parametric",
-              analysis_method
-            ),
-            nboot = 10,
-            plot.type = "box",
-            pairwise.comparisons = TRUE,
-            results.subtitle = identical(input$show_statis, "show"),
-            var.equal = identical(analysis_method, "parametric_variance_equal"),
-            mean.plotting = FALSE,
-            sample.size.label = FALSE,
-            ggtheme = theme_classic(),
-            ########################################
-            # Customized parameter
-            ########################################
-            xlab = input$plot_x_lab,
-            ylab = z,
-            pairwise.display = input$pairwise_display,
-            # Outdate and unavaible, Remove
-            p.adjust.method = input$p_adjust_method,
-            # ggplot theme
-            ggplot.component = theme(text = element_text(family = "wqy-microhei"))
           )
-        })
-      }) %>%
-      plot_grid(
-        plotlist = .,
-        ncol = input$figure_ncol,
-        align = "h",
-        labels = input$cow_lab
-      ) }})
-  
+
+        post_hoc_data <-
+          rct_df_data_by_tr %>%
+          nest(-name) %>%
+          mutate(
+            data = map2(name, data, function(x, y) {
+              bind_cols(name = x, y)
+            })
+          )
+
+        method_by_select <-
+          rct_df_dist_n_method()$Varible %>%
+          map(~ input[[paste0("var_", .x)]])
+
+        # get input from dynamic uiOutput
+        # I need to use a new trick to access the values the input values.
+        # So far we’ve always accessed the components of input with $, e.g. input$col1.
+        # But here we have the input names in a character vector,
+        # like var <- "col1". $ no longer works in this scenario,
+        # so we need to swich to [[, i.e. input[[var]].
+
+        list(
+          method_by_select,
+          post_hoc_data$data,
+          post_hoc_data$name
+        ) %>%
+          pmap(function(x, y, z) {
+            withProgress(expr = {
+              setProgress(
+                message = "Calculation in progress",
+                detail = "This may take a while...",
+                value = 1
+              )
+              if (
+                x %in%
+                  c(
+                    "Wilcoxon Signed rank test",
+                    "Wilcoxon Rank Sum test",
+                    "Kruskal Wallis H test"
+                  )
+              ) {
+                analysis_method <- "nonparametric"
+              } else if (x == "t test (equal variance)") {
+                # t test (equal variance) should be considered
+                # a special name
+                analysis_method <- "parametric_variance_equal"
+              } else {
+                # In ggstatsplot, parametric test will performed by
+                # games howell post-hoc test
+                # This is similar to tukey-karmer test
+                analysis_method <- "parametric"
+              }
+
+              # print(y)
+
+              showtext_auto()
+              ggbetweenstats(
+                data = y,
+                x = Treatment,
+                y = value,
+                grouping.var = name,
+                type = if_else(
+                  analysis_method == "parametric_variance_equal",
+                  "parametric",
+                  analysis_method
+                ),
+                nboot = 10,
+                plot.type = "box",
+                pairwise.comparisons = TRUE,
+                results.subtitle = identical(input$show_statis, "show"),
+                var.equal = identical(
+                  analysis_method,
+                  "parametric_variance_equal"
+                ),
+                mean.plotting = FALSE,
+                sample.size.label = FALSE,
+                ggtheme = theme_classic(),
+                ########################################
+                # Customized parameter
+                ########################################
+                xlab = input$plot_x_lab,
+                ylab = z,
+                pairwise.display = input$pairwise_display,
+                # Outdate and unavaible, Remove
+                p.adjust.method = input$p_adjust_method,
+                # ggplot theme
+                ggplot.component = theme(
+                  text = element_text(family = "wqy-microhei")
+                )
+              )
+            })
+          }) %>%
+          plot_grid(
+            plotlist = .,
+            ncol = input$figure_ncol,
+            align = "h",
+            labels = input$cow_lab
+          )
+      }
+    })
+
   event_rct_gg_post_hoc <- eventReactive(
     input$plot_figure,
     rct_gg_post_hoc()
