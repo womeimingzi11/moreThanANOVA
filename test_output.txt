@@ -1,0 +1,20 @@
+--------------------
+Testing Dataset: 2-Sample Normal (Sig) (2-sample)
+Statistic Change: R=1.13637, C++=1.13637 ... ✅ MATCH
+P-value: R=0.0005, C++=0.0005
+--------------------
+Testing Dataset: 2-Sample Skewed (Non-Sig) (2-sample)
+Statistic Change: R=0.12032, C++=0.12032 ... ✅ MATCH
+P-value: R=0.5692, C++=0.5562
+--------------------
+Testing Dataset: 2-Sample Small w/ Outlier (2-sample)
+Statistic Change: R=23.00000, C++=23.00000 ... ✅ MATCH
+P-value: R=0.0055, C++=0.0080
+--------------------
+Testing Dataset: K-Sample Balanced (Sig) (k-sample)
+Statistic Change: R=2.47034, C++=2.47034 ... ✅ MATCH
+P-value: R=0.0778 (500 perms), C++=0.0825 (2000 perms)
+--------------------
+Testing Dataset: K-Sample Unbalanced (Non-Sig) (k-sample)
+Statistic Change: R=2.52850, C++=2.52850 ... ✅ MATCH
+P-value: R=0.0858 (500 perms), C++=0.0885 (2000 perms)

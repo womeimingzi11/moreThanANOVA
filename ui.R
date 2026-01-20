@@ -30,7 +30,7 @@ library(cowplot)
 # Package for tests
 
 ### Levene’s test
-library(car)
+# library(car)
 
 ### Multiple Compare
 # library(rcompanion)

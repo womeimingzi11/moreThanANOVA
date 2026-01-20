@@ -113,3 +113,57 @@ List perm_test_2sample(NumericVector x, NumericVector y, int n_perms = 999) {
   return List::create(Named("statistic") = obs_diff,
                       Named("p.value") = p_val);
 }
+
+// Helper: Calculate Absolute Deviations
+NumericVector abs_deviation(NumericVector x, double center) {
+  int n = x.size();
+  NumericVector res(n);
+  for(int i=0; i<n; i++) res[i] = std::abs(x[i] - center);
+  return res;
+}
+
+// [[Rcpp::export]]
+List levene_test_cpp(NumericVector value, IntegerVector group, bool center_mean = true) {
+  int n = value.size();
+  int n_groups = max(group);
+  
+  // 1. Calculate Group Centers (Mean or Median)
+  std::vector<std::vector<double>> group_vals(n_groups);
+  for(int i=0; i<n; i++) {
+    group_vals[group[i]-1].push_back(value[i]);
+  }
+  
+  std::vector<double> centers(n_groups);
+  for(int g=0; g<n_groups; g++) {
+    NumericVector v = wrap(group_vals[g]);
+    if (center_mean) {
+      centers[g] = mean(v);
+    } else {
+      centers[g] = median(v);
+    }
+  }
+  
+  // 2. Transform Data: Z_ij = |Y_ij - center_i|
+  NumericVector z(n);
+  for(int i=0; i<n; i++) {
+    z[i] = std::abs(value[i] - centers[group[i]-1]);
+  }
+  
+  // 3. Perform One-Way ANOVA on Z
+  double F = calculate_f_stat(z, group, n_groups);
+  
+  // 4. Calculate P-value using F-distribution approximation
+  //    (Normally we'd use R::pf, but let's just return F first. 
+  //     To get p-value without R::pf, we can pass it back to R or include Rmath.h)
+  
+  // Degrees of freedom
+  double df1 = n_groups - 1;
+  double df2 = n - n_groups;
+  
+  double p_value = R::pf(F, df1, df2, false, false); // lower_tail=false for P(X>F)
+  
+  return List::create(Named("statistic") = F,
+                      Named("p.value") = p_value,
+                      Named("df1") = df1,
+                      Named("df2") = df2);
+}

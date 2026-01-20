@@ -235,15 +235,17 @@ server <- function(input, output, session) {
 
   rct_levene_p <- reactive({
     if (rct_condition_ls()$to_levene) {
-      # rct_df_data[, -1] %>%
       rct_df_data()[, -1] %>%
         map_dfc(function(value_by_col) {
-          # leveneTest(value_by_col, group = rct_df_data[, 1]) %>%
-          leveneTest(value_by_col, group = rct_df_data()[, 1]) %>%
-            tidy() %>%
-            select(p.value)
+          # Use C++ Levene (median center = Brown-Forsythe, default of car::leveneTest)
+          res_levene <- levene_test_cpp(
+            as.numeric(value_by_col),
+            as.integer(factor(rct_df_data()[[1]])), # Ensure it matches group indices (1-based)
+            center_mean = FALSE
+          )
+
+          res_levene$p.value
         }) %>%
-        # set_names(names(rct_analysis_method))
         set_names(names(rct_analysis_method()))
     }
   })
