@@ -32,11 +32,8 @@ library(cowplot)
 ### Levene’s test
 library(car)
 
-### Permutation test
-library(coin)
-
 ### Multiple Compare
-library(rcompanion)
+# library(rcompanion)
 library(multcompView)
 
 ### Plot Multiple Compare

@@ -1,5 +1,36 @@
 # Sidebar with a slider input for number of bins)
 # Define server logic required to draw a histogram
+library(Rcpp)
+sourceCpp("src/permutation.cpp")
+
+pairwise_perm_cpp <- function(formula, data, method = "fdr") {
+  vars <- all.vars(formula)
+  resp <- vars[1]
+  grp <- vars[2]
+
+  groups <- unique(data[[grp]])
+  combos <- combn(groups, 2)
+
+  p_values <- numeric(ncol(combos))
+  comparisons <- character(ncol(combos))
+
+  for (i in 1:ncol(combos)) {
+    g1 <- combos[1, i]
+    g2 <- combos[2, i]
+
+    val1 <- data[[resp]][data[[grp]] == g1]
+    val2 <- data[[resp]][data[[grp]] == g2]
+
+    res <- perm_test_2sample(as.numeric(val1), as.numeric(val2), n_perms = 999)
+    p_values[i] <- res$p.value
+    comparisons[i] <- paste(g1, "-", g2)
+  }
+
+  p.adj <- p.adjust(p_values, method = method)
+  names(p.adj) <- comparisons
+  return(list(Adjusted = p.adj))
+}
+
 server <- function(input, output, session) {
   observeEvent(input$selected_language, {
     # This print is just for demonstration
@@ -459,16 +490,19 @@ server <- function(input, output, session) {
 
         switch(
           var_method,
-          "Permutation test" = independence_test(
-            var_data ~ factor(rct_df_data()$Treatment),
-            distribution = approximate(nresample = 999)
-          ) %>%
+          "Permutation test" = {
+            res_perm <- perm_test_ksample(
+              as.numeric(var_data),
+              as.integer(factor(rct_df_data()$Treatment)),
+              n_perms = 999
+            )
             tibble(
-              statistic = statistic(.),
-              p.value = pvalue(.) %>% as.numeric(),
+              statistic = res_perm$statistic,
+              p.value = res_perm$p.value,
               df = "",
               method = "Monte Carlo Permutation test"
-            ),
+            )
+          },
           # for param which is not met the standard of one-way ANOVA
           # t test will be performed
           "t test (unequal variance)" = t.test(
@@ -588,7 +622,7 @@ server <- function(input, output, session) {
           )
 
         ls_perm_res <-
-          pairwisePermutationMatrix(
+          pairwise_perm_cpp(
             var ~ Treatment,
             data = df_tr_var,
             method = input$p_adjust_method
